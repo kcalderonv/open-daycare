@@ -1,26 +1,66 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-cream: #f6ecdf;
+  --color-surface: #fffdf9;
+  --color-border: #ece0d0;
+  --color-ink: #3f362e;
+  --color-body: #4a4038;
+  --color-muted: #94887b;
+  --color-muted-soft: #a89a8b;
+  --color-eyebrow: #d9583c;
+  --color-coral: #f2937a;
+  --color-coral-icon: #e0654a;
+  --color-coral-link: #c5503a;
+  --color-coral-soft: #fbe3d8;
+  --color-cta-from: #f4977e;
+  --color-cta-to: #ee8164;
+  --color-separator: #e7dac8;
+  --color-divider: #f0e6d8;
+  --color-photo-bg: #f4ece1;
+  --color-photo-border: #dbcdba;
+  --color-photo-text: #b0a290;
+  --color-scrollbar-thumb: #e4d6c4;
+  --color-logo-from: #f8c3a8;
+  --color-nav: #6e6359;
+  --color-section-label: #8a7c6d;
+  --color-badge-achievement-bg: #cfebd8;
+  --color-badge-achievement: #3e9b6c;
+  --color-badge-activity-bg: #c7e7f1;
+  --color-badge-activity: #2e89a6;
+  --color-badge-announcement-bg: #ccd8f4;
+  --color-badge-announcement: #4e72c8;
+  --color-avatar-sky-bg: #a9d9e8;
+  --color-avatar-sky-fg: #1f7a93;
+  --color-avatar-indigo-bg: #ccd8f4;
+  --color-avatar-indigo-fg: #4e72c8;
+
+  --breakpoint-shell: 1025px;
+
+  --shadow-cta: 0 8px 18px -8px rgb(238 129 100 / 0.75);
+  --shadow-card: 0 4px 16px -12px rgb(120 90 60 / 0.5);
+  --shadow-composer: 0 4px 14px -10px rgb(120 90 60 / 0.4);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-fredoka), "Fredoka", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-nunito), "Nunito", ui-sans-serif, system-ui, sans-serif;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-cream);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-scrollbar-thumb);
+  background-clip: content-box;
+  border: 3px solid transparent;
+  border-radius: 8px;
 }
