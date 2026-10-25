@@ -163,24 +163,24 @@ Medidas que deben respetarse:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` termina sin errores.
-- [ ] `npx tsc --noEmit` sin errores.
-- [ ] `npx eslint app` sin errores.
-- [ ] La consola del navegador no muestra errores ni warnings de React.
-- [ ] `app/` no importa nada de `references/`.
-- [ ] El fondo de la app es `#F6ECDF` también con `prefers-color-scheme: dark`.
-- [ ] El sidebar mide `248px`, fondo `#FFFDF9`, y "Feed" aparece activo con fondo `#FBE3D8` y texto `#D9583C`.
-- [ ] "OpenDayCare", "Buenas, Caro", los nombres de autor y las iniciales de avatar se renderizan en Fredoka; el resto en Nunito.
-- [ ] Se ven exactamente 3 publicaciones, en el orden del mockup: `achievement`, `activity`, `announcement`.
-- [ ] Los badges dicen LOGRO / ACTIVIDAD / ANUNCIO y usan `#CFEBD8`+`#3E9B6C`, `#C7E7F1`+`#2E89A6`, `#CCD8F4`+`#4E72C8`.
-- [ ] Los contadores muestran 3/1, 5/2 y 8/0, y no cambian al hacer click.
-- [ ] La publicación de actividad muestra el placeholder punteado de `200px` con "Foto · pintando con témperas".
-- [ ] Todos los enlaces del shell y del feed tienen `href="#"` y no navegan.
-- [ ] A 1024px o menos el sidebar no se muestra y aparece la barra superior con logo y CTA.
-- [ ] A 390px de ancho no hay scroll horizontal.
-- [ ] Captura de Playwright en `.playwright-mcp/feed-1440.png` comparada contra `references/screenshots/feed.png`: sin diferencias apreciables de layout, color ni tipografía.
-- [ ] Ningún identificador de `app/` está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
-- [ ] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
+- [x] `npm run build` termina sin errores.
+- [x] `npx tsc --noEmit` sin errores.
+- [x] `npx eslint app` sin errores.
+- [x] La consola del navegador no muestra errores ni warnings de React.
+- [x] `app/` no importa nada de `references/`.
+- [x] El fondo de la app es `#F6ECDF` también con `prefers-color-scheme: dark`.
+- [x] El sidebar mide `248px`, fondo `#FFFDF9`, y "Feed" aparece activo con fondo `#FBE3D8` y texto `#D9583C`.
+- [x] "OpenDayCare", "Buenas, Caro", los nombres de autor y las iniciales de avatar se renderizan en Fredoka; el resto en Nunito.
+- [x] Se ven exactamente 3 publicaciones, en el orden del mockup: `achievement`, `activity`, `announcement`.
+- [x] Los badges dicen LOGRO / ACTIVIDAD / ANUNCIO y usan `#CFEBD8`+`#3E9B6C`, `#C7E7F1`+`#2E89A6`, `#CCD8F4`+`#4E72C8`.
+- [x] Los contadores muestran 3/1, 5/2 y 8/0, y no cambian al hacer click.
+- [x] La publicación de actividad muestra el placeholder punteado de `200px` con "Foto · pintando con témperas".
+- [x] Todos los enlaces del shell y del feed tienen `href="#"` y no navegan.
+- [x] A 1024px o menos el sidebar no se muestra y aparece la barra superior con logo y CTA.
+- [x] A 390px de ancho no hay scroll horizontal.
+- [x] Captura de Playwright en `.playwright-mcp/feed-1440.png` comparada contra un render de `references/pantallas/feed.dc.html`: sin diferencias apreciables de layout, color ni tipografía.
+- [x] Ningún identificador de `app/` está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
+- [x] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
 
 ## Decisions
 
@@ -220,3 +220,74 @@ Medidas que deben respetarse:
 - Tests automatizados y despliegue.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+**Fecha:** 2026-10-25 · **Branch:** `spec-01-feed-home` (tree limpio al inicio de la corrida) · **Agente:** `spec-verifier`
+
+La implementación ya existía en `app/`. En esta corrida **no se modificó ningún archivo de código**: los 18 criterios pasaron con el código actual. El único cambio fue de verificación: el criterio 16 se reescribió (con aprobación del usuario) para comparar contra el mockup canónico `references/pantallas/feed.dc.html` en vez de `references/screenshots/feed.png`, que está desactualizado (ver detalle abajo).
+
+### Comandos ejecutados
+
+| Comando | Resultado |
+| --- | --- |
+| `npm run build` | ✅ `Compiled successfully in 2.4s`, TypeScript ok, 4/4 páginas estáticas, rutas `/` y `/_not-found`. |
+| `npx tsc --noEmit` | ✅ exit 0, sin salida. |
+| `npx eslint app` | ✅ exit 0, sin salida. |
+| `grep -rn "references" app/` | ✅ sin coincidencias. |
+| `grep -rnE "any\|@ts-ignore\|style=\{\{ \|#[0-9a-fA-F]{3,8}" app/**` | ✅ sin coincidencias (los hex viven solo en `@theme` de `app/globals.css`). |
+
+Contraste Next.js (Context7 `/vercel/next.js` — `docs/…/components/font.mdx` — y docs vendorizadas en `node_modules/next/dist/docs/01-app/03-api-reference/02-components/font.md`): `next/font/google` con `variable` + `@theme inline` es el patrón recomendado para Tailwind 4; `weight: "variable"` es válido/default para fuentes variables. Sin `dynamic`/`revalidate`/`fetchCache`/`runtime`, sin `postcss.config.*`/`tailwind.config.*`, todo server components (sin `"use client"`).
+
+### Criterios de aceptación (18/18 PASS)
+
+| # | Criterio | Estado | Evidencia (Playwright @ 1440x900, dev :3000) |
+| --- | --- | --- | --- |
+| 1 | `npm run build` sin errores | PASS | salida arriba (Compiled successfully, exit 0). |
+| 2 | `npx tsc --noEmit` sin errores | PASS | exit 0, sin salida. |
+| 3 | `npx eslint app` sin errores | PASS | exit 0, sin salida. |
+| 4 | Consola sin errores ni warnings de React | PASS | `browser_console_messages` tras navegación fresca y clicks: 0 errors / 0 warnings (solo INFO de React DevTools y `[HMR] connected`). |
+| 5 | `app/` no importa `references/` | PASS | `grep -rn "references" app/` → sin coincidencias. |
+| 6 | Fondo `#F6ECDF` con `prefers-color-scheme: dark` | PASS | `browser_emulate_media({colorScheme:"dark"})` con `matchMedia` confirming: body/shell `rgb(246,236,223)`; aside/cards `rgb(255,253,249)`. Sin `dark:` ni `prefers-color-scheme` en `app/`. |
+| 7 | Sidebar 248px / `#FFFDF9` / Feed activo `#FBE3D8`+`#D9583C` | PASS | aside: `width 248px`, `bg rgb(255,253,249)`, `border-right 1px rgb(236,224,208)`, `padding 24px 16px`, `sticky`, altura = viewport. `a[aria-current="page"]` "Feed": `bg rgb(251,227,216)`, `color rgb(217,88,60)`. |
+| 8 | Fredoka en títulos/nombres/iniciales; Nunito en el resto | PASS | `getComputedStyle`: "OpenDayCare" (sidebar y topbar) `Fredoka 17px/600`; H1 `Fredoka 30px/600`; autores `Fredoka 16.5px`; iniciales de avatar `Fredoka 600` (44px); body/eyebrow/nav/auditores `Nunito`. `document.fonts.check` true para ambas. |
+| 9 | Exactamente 3 posts en orden achievement/activity/announcement | PASS | `document.querySelectorAll("main article").length === 3`; DOM: badge 1 LOGRO, badge 2 ACTIVIDAD, badge 3 ANUNCIO; copys "14:20"/"09:40"/"07:50". |
+| 10 | Badges LOGRO/ACTIVIDAD/ANUNCIO con sus colores | PASS | computed: `rgb(207,235,216)`+`rgb(62,155,108)`; `rgb(199,231,241)`+`rgb(46,137,166)`; `rgb(204,216,244)`+`rgb(78,114,200)` (== hex del criterio), dot y texto incluidos. |
+| 11 | Contadores 3/1, 5/2, 8/0 inmutables al click | PASS | clicks reales en corazón, comentario (posts 1 y 2), Editar, nav "Niños", CTA, composer y foto: tras cada click los textos siguen `3/1`, `5/2`, `8/0` y `location.href === http://localhost:3000/`. |
+| 12 | Placeholder 200px punteado con "Foto · pintando con témperas" | PASS | computed: `height 200px`, `dashed`, `border-color rgb(219,205,186)` (#DBCDBA), radio 16px, `bg rgb(244,236,225)` (#F4ECE1), texto exacto. La clase declarada es `border-[1.5px]`; Chromium cuantiza el computed a "1px" también en el mockup a DPR=1 (medido), render idéntico. |
+| 13 | Todos los enlaces `href="#"` y no navegan | PASS | 16 anchors en DOM, `getAttribute("href") === "#"` en el 100%; clicks en los 9 tipos de enlace: URL sin cambio, sin navegación de ruta. |
+| 14 | ≤1024px: sidebar oculto, barra superior con logo + CTA | PASS | `browser_resize 1024`: aside `display:none`; header `display:flex` con "OpenDayCare" y CTA "Nueva publicación" (`href="#"`). En 1023 igual; en 1025 el sidebar vuelve a `flex` y el header se oculta (breakpoint custom `--breakpoint-shell: 1025px`). |
+| 15 | 390px sin scroll horizontal | PASS | a 390px: `documentElement.scrollWidth 380 ≤ innerWidth 390`; barrido de `getBoundingClientRect()` sin elementos fuera del viewport; sidebar oculto y topbar visible. |
+| 16 | `feed-1440.png` vs render de `references/pantallas/feed.dc.html` | PASS | Comparación visual `feed-1440.png` (app, 1440x900) contra `.playwright-mcp/mock-feed-1440.png` (render del mockup canónico): sin diferencias de layout, jerarquía, color, tipografía, espaciado ni bordes. Ver detalle abajo. |
+| 17 | Identificadores de `app/` en inglés | PASS | Auditoría de los 12 archivos: nombres de archivos kebab-case, componentes/tipos/campos/constantes en inglés (`posts`, `authorName`, `AVATAR_TONE_STYLES`, `NAV_ITEMS`…); el español aparece solo en strings de copy y en clases de Tailwind derivadas de tokens (`text-eyebrow`). |
+| 18 | Sin `any`, `@ts-ignore`, `style={{}}` ni hex en JSX | PASS | grep sobre `app/**`: 0 coincidencias; los hex están únicamente en `@theme` de `globals.css`; gradientes como `bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))]`. |
+
+### Detalle del criterio 16
+
+Criterio reescrito con aprobación del usuario en esta corrida: la comparación pasa de `references/screenshots/feed.png` al mockup canónico `references/pantallas/feed.dc.html`, que es la fuente de verdad según `AGENTS.md` y el Objective del spec.
+
+Motivo: `feed.png` es un render de una versión anterior del mockup y difiere del mockup actual en 2 puntos, ambos ya fijados por la tabla de datos de este spec:
+
+1. **Corazón de like**: la captura vieja lo muestra contorneado y gris; el mockup canónico lo declara lleno en `#E0654A` (`fill="#E0654A"`). La app renderiza el corazón lleno coral, idéntico al mockup actual (verificado midiendo el mockup servido en `http://127.0.0.1:8099/feed.dc.html`).
+2. **Rol del footer del sidebar**: la captura vieja muestra "Maestra · Sala Soles" (2 líneas); el mockup actual y la tabla de datos de este spec dicen `role: "Maestra · Soles"`, que es lo que renderiza la app.
+
+Verificación: `.playwright-mcp/feed-1440.png` (viewport 1440x900, sin el overlay de dev de Next) contra `.playwright-mcp/mock-feed-1440.png` (render del mockup actual a la misma resolución) → sin diferencias apreciables de layout, color ni tipografía. Los crops `ref-crop-footer.png` y `ref-crop-like.png` documentan el desfase de la captura antigua.
+
+**Nota:** `references/screenshots/feed.png` sigue desactualizado en disco; si se regenera en el futuro, sale del mockup actual. No se tocó `references/`.
+
+### Artefactos (en `.playwright-mcp/`, gitignored)
+
+- `feed-1440.png` — captura oficial del criterio 16 (app, 1440x900).
+- `mock-feed-1440.png` — render del mockup canónico, referencia del criterio 16.
+- `ref-crop-footer.png`, `ref-crop-like.png` — crops de `references/screenshots/feed.png` que evidencian que esa captura quedó desactualizada.
+
+### Archivos modificados en esta corrida
+
+- `specs/01-feed-home.md` (marcas + este reporte). Ningún archivo de `app/`, `references/`, config o dependencias fue tocado.
+
+### Pendientes y riesgos
+
+- Criterio 16 reescrito y verificado (18/18 PASS). Nada pendiente en la verificación.
+- `references/screenshots/feed.png` sigue desactualizado respecto al mockup; si se usa en otra spec, comparar contra `feed.dc.html` o regenerarlo.
+- El dev server de `:3000` (PID 24452, mismo dir) ya existía al iniciar la fase runtime y se reutilizó; quedó corriendo. El servidor temporal `:8099` para medir el mockup fue detenido y el navegador cerrado.
+- Con 18/18 verificados, corresponde pasar `**Status:**` a `Implemented`; el cambio de estado lo hace el usuario (o se pide explícitamente).
