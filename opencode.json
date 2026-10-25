@@ -1,0 +1,14 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "playwright": {
+        "type": "local",
+        "command": ["cmd.exe", "/c", "npx -y @playwright/mcp@latest"],
+        "timeout": {
+          "startup": 60000
+        }
+      }
+    }
+  }
+}
