@@ -1,5 +1,10 @@
 import { AppShell } from "@/app/_components/app-shell";
+import { PostComposerProvider } from "@/app/_components/feed/post-composer-provider";
 
 export default function AppGroupLayout({ children }: LayoutProps<"/">) {
-  return <AppShell>{children}</AppShell>;
+  return (
+    <PostComposerProvider>
+      <AppShell>{children}</AppShell>
+    </PostComposerProvider>
+  );
 }

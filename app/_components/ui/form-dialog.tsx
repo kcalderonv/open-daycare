@@ -4,14 +4,13 @@ import {
   createContext,
   useContext,
   useRef,
-  type KeyboardEvent,
-  type MouseEvent,
   type ReactElement,
   type ReactNode,
 } from "react";
-
-const FOCUSABLE_SELECTOR =
-  'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
+import {
+  ModalDialog,
+  type ModalDialogHandle,
+} from "@/app/_components/ui/modal-dialog";
 
 const FormDialogContext = createContext<(() => void) | null>(null);
 
@@ -40,92 +39,31 @@ export function FormDialog({
   initialFocusId,
   children,
 }: FormDialogProps): ReactElement {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  function openDialog() {
-    const dialog = dialogRef.current;
-
-    if (!dialog) {
-      return;
-    }
-
-    dialog.showModal();
-    dialog.querySelector<HTMLElement>(`#${initialFocusId}`)?.focus();
-  }
+  const dialogRef = useRef<ModalDialogHandle>(null);
 
   function closeDialog() {
-    const dialog = dialogRef.current;
-
-    if (!dialog) {
-      return;
-    }
-
-    dialog.close();
-    // Chromium queues the dialog's `close` event as an element task, which can
-    // land after the dialog is reopened. Clearing in the same tick keeps the
-    // reset deterministic for every programmatic close.
-    dialog.querySelector("form")?.reset();
-  }
-
-  function handleBackdropClick(event: MouseEvent<HTMLDivElement>) {
-    if (event.target === event.currentTarget) {
-      closeDialog();
-    }
-  }
-
-  function handleClose() {
-    dialogRef.current?.querySelector("form")?.reset();
-  }
-
-  // Chromium lets Tab escape to the browser chrome, so the dialog scope is
-  // wrapped by hand to keep focus inside the modal.
-  function handleKeyDown(event: KeyboardEvent<HTMLDialogElement>) {
-    if (event.key !== "Tab") {
-      return;
-    }
-
-    const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
-      FOCUSABLE_SELECTOR,
-    );
-
-    if (!focusable || focusable.length === 0) {
-      return;
-    }
-
-    const first = focusable[0];
-    const last = focusable[focusable.length - 1];
-
-    if (event.shiftKey && document.activeElement === first) {
-      event.preventDefault();
-      last.focus();
-    } else if (!event.shiftKey && document.activeElement === last) {
-      event.preventDefault();
-      first.focus();
-    }
+    dialogRef.current?.close();
   }
 
   return (
     <>
-      <button type="button" onClick={openDialog} className={triggerClassName}>
+      <button
+        type="button"
+        onClick={() => dialogRef.current?.open()}
+        className={triggerClassName}
+      >
         {triggerContent}
       </button>
 
-      <dialog
+      <ModalDialog
         ref={dialogRef}
-        aria-labelledby={titleId}
-        onClose={handleClose}
-        onKeyDown={handleKeyDown}
-        className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-transparent p-0 backdrop:bg-ink/45"
+        titleId={titleId}
+        initialFocusId={initialFocusId}
       >
-        <div
-          onClick={handleBackdropClick}
-          className="flex min-h-dvh items-start justify-center overflow-y-auto p-4 sm:px-6 sm:py-10"
-        >
-          <FormDialogContext.Provider value={closeDialog}>
-            {children}
-          </FormDialogContext.Provider>
-        </div>
-      </dialog>
+        <FormDialogContext.Provider value={closeDialog}>
+          {children}
+        </FormDialogContext.Provider>
+      </ModalDialog>
     </>
   );
 }
