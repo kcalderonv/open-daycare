@@ -34,6 +34,31 @@
   --color-avatar-sky-fg: #1f7a93;
   --color-avatar-indigo-bg: #ccd8f4;
   --color-avatar-indigo-fg: #4e72c8;
+  --color-child-sky-bg: #a9d9e8;
+  --color-child-sky-fg: #1f7a93;
+  --color-child-rose-bg: #f4b8cc;
+  --color-child-rose-fg: #c44a7a;
+  --color-child-sage-bg: #b9dec4;
+  --color-child-sage-fg: #3e8b62;
+  --color-child-sun-bg: #f4dc8e;
+  --color-child-sun-fg: #9a7b1e;
+  --color-child-lilac-bg: #c9b6e8;
+  --color-child-lilac-fg: #7b5fc0;
+  --color-parent-lilac-bg: #c9b6e8;
+  --color-parent-blue-bg: #a9c7e8;
+  --color-tag-allergy-bg: #fbd8cc;
+  --color-tag-allergy-fg: #d9684a;
+  --color-tag-link-bg: #f9d2de;
+  --color-tag-link-fg: #c56486;
+  --color-badge-pending-bg: #f7e7a6;
+  --color-badge-pending: #9a7b1e;
+  --color-allergy-panel: #fbdad6;
+  --color-allergy-icon-bg: #f4a8a0;
+  --color-allergy-title: #c5413a;
+  --color-allergy-body: #b25249;
+  --color-chevron: #cbb89f;
+  --color-avatar-empty-border: #d8cbba;
+  --color-placeholder: #b6a99b;
 
   --breakpoint-shell: 1025px;
 

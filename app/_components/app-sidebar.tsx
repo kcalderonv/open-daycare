@@ -1,29 +1,8 @@
-import type { ComponentType } from "react";
 import Link from "next/link";
+import { AppSidebarNav } from "@/app/_components/app-sidebar-nav";
 import { Brand } from "@/app/_components/brand";
-import {
-  BellIcon,
-  HomeIcon,
-  LogOutIcon,
-  PlusIcon,
-  UserIcon,
-  UsersIcon,
-  type IconProps,
-} from "@/app/_components/icons";
+import { LogOutIcon, PlusIcon } from "@/app/_components/icons";
 import { currentUser } from "@/app/_data/feed";
-
-type NavItem = {
-  label: string;
-  icon: ComponentType<IconProps>;
-  active?: boolean;
-};
-
-const NAV_ITEMS: NavItem[] = [
-  { label: "Feed", icon: HomeIcon, active: true },
-  { label: "Niños", icon: UsersIcon },
-  { label: "Avisos", icon: BellIcon },
-  { label: "Mi cuenta", icon: UserIcon },
-];
 
 export function AppSidebar() {
   return (
@@ -40,23 +19,7 @@ export function AppSidebar() {
         Nueva publicación
       </Link>
 
-      <nav className="flex flex-1 flex-col gap-1">
-        {NAV_ITEMS.map(({ label, icon: Icon, active }) => (
-          <Link
-            key={label}
-            href="#"
-            aria-current={active ? "page" : undefined}
-            className={
-              active
-                ? "flex items-center gap-3 rounded-xl bg-coral-soft px-3 py-[11px] text-[14.5px] font-extrabold text-eyebrow"
-                : "flex items-center gap-3 rounded-xl px-3 py-[11px] text-[14.5px] font-semibold text-nav"
-            }
-          >
-            <Icon width={19} height={19} />
-            {label}
-          </Link>
-        ))}
-      </nav>
+      <AppSidebarNav />
 
       <div className="mt-[10px] border-t border-border pt-[14px]">
         <div className="flex items-center gap-[11px] px-2 py-1.5">
