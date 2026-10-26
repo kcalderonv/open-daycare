@@ -43,7 +43,7 @@ export function AuthField({
         name={name}
         type={type}
         className={`w-full rounded-[14px] border-[1.5px] bg-white px-4 py-3.5 text-ink outline-none focus:border-coral ${
-          highlighted ? "border-coral" : "border-auth-input-border"
+          highlighted ? "border-auth-input-active" : "border-auth-input-border"
         } ${VARIANT_STYLES[variant]}`}
       />
     </div>
