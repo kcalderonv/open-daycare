@@ -1,5 +1,6 @@
-import Link from "next/link";
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
+import { ChildForm } from "@/app/_components/children/child-form";
+import { ChildFormDialog } from "@/app/_components/children/child-form-dialog";
 import { room, type Child } from "@/app/_data/children";
 
 export function ChildProfileHeader({ child }: { child: Child }) {
@@ -16,12 +17,12 @@ export function ChildProfileHeader({ child }: { child: Child }) {
         </p>
       </div>
 
-      <Link
-        href="#"
-        className="rounded-xl border-[1.5px] border-border bg-surface px-4 py-[9px] text-[14px] font-bold text-nav"
+      <ChildFormDialog
+        triggerLabel="Editar"
+        triggerClassName="cursor-pointer rounded-xl border-[1.5px] border-border bg-surface px-4 py-[9px] text-[14px] font-bold text-nav focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
       >
-        Editar
-      </Link>
+        <ChildForm mode="edit" child={child} />
+      </ChildFormDialog>
     </div>
   );
 }

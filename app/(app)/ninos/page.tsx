@@ -1,4 +1,5 @@
-import Link from "next/link";
+import { ChildForm } from "@/app/_components/children/child-form";
+import { ChildFormDialog } from "@/app/_components/children/child-form-dialog";
 import { ChildrenSearch } from "@/app/_components/children/children-search";
 import { PlusIcon } from "@/app/_components/icons";
 import { children } from "@/app/_data/children";
@@ -14,13 +15,13 @@ export default function ChildrenPage() {
           <h1 className="font-display text-[30px] font-semibold text-ink">Niños</h1>
         </div>
 
-        <Link
-          href="#"
-          className="flex flex-none items-center gap-2 rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] px-[18px] py-[11px] text-[14.5px] font-extrabold text-white shadow-cta"
+        <ChildFormDialog
+          triggerLabel="Agregar niño"
+          triggerIcon={<PlusIcon width={17} height={17} />}
+          triggerClassName="flex flex-none cursor-pointer items-center gap-2 rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] px-[18px] py-[11px] text-[14.5px] font-extrabold text-white shadow-cta focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
         >
-          <PlusIcon width={17} height={17} />
-          Agregar niño
-        </Link>
+          <ChildForm mode="create" />
+        </ChildFormDialog>
       </header>
 
       <ChildrenSearch items={children} />

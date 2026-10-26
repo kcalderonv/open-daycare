@@ -18,6 +18,7 @@ export type Child = {
   tone: ChildTone;
   ageLabel: string;
   birthDateLabel: string;
+  birthDateInput: string;
   joinedAtLabel: string;
   allergies: { label: string; note: string }[];
   parents: Parent[];
@@ -40,6 +41,7 @@ export const children: Child[] = [
     tone: "sky",
     ageLabel: "3 años",
     birthDateLabel: "12 mar 2022",
+    birthDateInput: "12/03/2022",
     joinedAtLabel: "feb 2025",
     allergies: [
       {
@@ -69,6 +71,7 @@ export const children: Child[] = [
     tone: "rose",
     ageLabel: "2 años",
     birthDateLabel: "08 sep 2023",
+    birthDateInput: "08/09/2023",
     joinedAtLabel: "mar 2025",
     allergies: [],
     parents: [
@@ -87,6 +90,7 @@ export const children: Child[] = [
     tone: "sage",
     ageLabel: "3 años",
     birthDateLabel: "21 ene 2022",
+    birthDateInput: "21/01/2022",
     joinedAtLabel: "feb 2025",
     allergies: [],
     parents: [
@@ -111,6 +115,7 @@ export const children: Child[] = [
     tone: "sun",
     ageLabel: "2 años",
     birthDateLabel: "03 nov 2023",
+    birthDateInput: "03/11/2023",
     joinedAtLabel: "mar 2025",
     allergies: [],
     parents: [],
@@ -122,6 +127,7 @@ export const children: Child[] = [
     tone: "lilac",
     ageLabel: "3 años",
     birthDateLabel: "17 may 2022",
+    birthDateInput: "17/05/2022",
     joinedAtLabel: "feb 2025",
     allergies: [
       {
@@ -145,6 +151,7 @@ export const children: Child[] = [
     tone: "rose",
     ageLabel: "2 años",
     birthDateLabel: "29 jul 2023",
+    birthDateInput: "29/07/2023",
     joinedAtLabel: "mar 2025",
     allergies: [],
     parents: [
@@ -163,6 +170,7 @@ export const children: Child[] = [
     tone: "sky",
     ageLabel: "3 años",
     birthDateLabel: "14 abr 2022",
+    birthDateInput: "14/04/2022",
     joinedAtLabel: "feb 2025",
     allergies: [],
     parents: [
@@ -181,6 +189,7 @@ export const children: Child[] = [
     tone: "sage",
     ageLabel: "2 años",
     birthDateLabel: "02 oct 2023",
+    birthDateInput: "02/10/2023",
     joinedAtLabel: "mar 2025",
     allergies: [],
     parents: [

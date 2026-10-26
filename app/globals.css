@@ -76,6 +76,7 @@
   --shadow-composer: 0 4px 14px -10px rgb(120 90 60 / 0.4);
   --shadow-auth-cta: 0 10px 22px -8px rgb(238 129 100 / 0.7);
   --shadow-auth-logo: 0 12px 26px -10px rgb(238 129 100 / 0.65);
+  --shadow-dialog: 0 20px 50px -24px rgb(63 54 46 / 0.35);
 }
 
 @theme inline {
