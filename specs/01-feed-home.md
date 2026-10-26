@@ -1,6 +1,6 @@
 # SPEC 01 — Feed como home, estilo idéntico al mockup
 
-> **Status:** Aprovado
+> **Status:** Inplementado
 > **Depends on:** ninguna
 > **Date:** 2026-10-25
 > **Objective:** Implementar `/` como el feed de OpenDayCare con el shell (sidebar + contenido) visualmente idéntico a `references/pantallas/feed.dc.html`, alimentado por datos mock locales y sin autenticación ni base de datos.

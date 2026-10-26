@@ -1,6 +1,6 @@
 # SPEC 03 — Login y activación de cuenta
 
-> **Status:** Aprovado
+> **Status:** Inplementado
 > **Depends on:** SPEC 01, SPEC 02
 > **Date:** 2026-10-26
 > **Objective:** Implementar `/login` y `/activar-cuenta` como las pantallas `login.dc.html` (sin el selector Personal/Familia) y `activar-cuenta.dc.html`, con datos mock locales y sin autenticación real.
