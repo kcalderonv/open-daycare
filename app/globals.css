@@ -59,12 +59,22 @@
   --color-chevron: #cbb89f;
   --color-avatar-empty-border: #d8cbba;
   --color-placeholder: #b6a99b;
+  --color-auth-bg: #fbf4ec;
+  --color-auth-hero-from: #f6a98e;
+  --color-auth-hero-mid: #f2937a;
+  --color-auth-hero-to: #ec7e62;
+  --color-auth-input-border: #eadfd0;
+  --color-consent-bg: #fbf1d6;
+  --color-consent-fg: #8a7234;
+  --color-consent-check: #5fb97e;
 
   --breakpoint-shell: 1025px;
 
   --shadow-cta: 0 8px 18px -8px rgb(238 129 100 / 0.75);
   --shadow-card: 0 4px 16px -12px rgb(120 90 60 / 0.5);
   --shadow-composer: 0 4px 14px -10px rgb(120 90 60 / 0.4);
+  --shadow-auth-cta: 0 10px 22px -8px rgb(238 129 100 / 0.7);
+  --shadow-auth-logo: 0 12px 26px -10px rgb(238 129 100 / 0.65);
 }
 
 @theme inline {

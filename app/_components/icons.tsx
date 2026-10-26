@@ -161,6 +161,14 @@ export function AlertTriangleIcon(props: IconProps) {
   );
 }
 
+export function CheckIcon(props: IconProps) {
+  return (
+    <Svg strokeWidth={3} {...props}>
+      <polyline points="20 6 9 17 4 12" />
+    </Svg>
+  );
+}
+
 export function MegaphoneIcon(props: IconProps) {
   return (
     <Svg {...props}>
