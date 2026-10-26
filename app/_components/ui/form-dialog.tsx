@@ -1,28 +1,45 @@
 "use client";
 
 import {
+  createContext,
+  useContext,
   useRef,
   type KeyboardEvent,
   type MouseEvent,
+  type ReactElement,
   type ReactNode,
 } from "react";
 
 const FOCUSABLE_SELECTOR =
   'button, input, select, textarea, a[href], [tabindex]:not([tabindex="-1"])';
 
-type ChildFormDialogProps = {
-  triggerLabel: string;
+const FormDialogContext = createContext<(() => void) | null>(null);
+
+export function useFormDialogClose(): () => void {
+  const closeDialog = useContext(FormDialogContext);
+
+  if (!closeDialog) {
+    throw new Error("useFormDialogClose must be used inside FormDialog");
+  }
+
+  return closeDialog;
+}
+
+type FormDialogProps = {
+  triggerContent: ReactNode;
   triggerClassName: string;
-  triggerIcon?: ReactNode;
+  titleId: string;
+  initialFocusId: string;
   children: ReactNode;
 };
 
-export function ChildFormDialog({
-  triggerLabel,
+export function FormDialog({
+  triggerContent,
   triggerClassName,
-  triggerIcon,
+  titleId,
+  initialFocusId,
   children,
-}: ChildFormDialogProps) {
+}: FormDialogProps): ReactElement {
   const dialogRef = useRef<HTMLDialogElement>(null);
 
   function openDialog() {
@@ -33,11 +50,21 @@ export function ChildFormDialog({
     }
 
     dialog.showModal();
-    dialog.querySelector<HTMLInputElement>("#child-name")?.focus();
+    dialog.querySelector<HTMLElement>(`#${initialFocusId}`)?.focus();
   }
 
   function closeDialog() {
-    dialogRef.current?.close();
+    const dialog = dialogRef.current;
+
+    if (!dialog) {
+      return;
+    }
+
+    dialog.close();
+    // Chromium queues the dialog's `close` event as an element task, which can
+    // land after the dialog is reopened. Clearing in the same tick keeps the
+    // reset deterministic for every programmatic close.
+    dialog.querySelector("form")?.reset();
   }
 
   function handleBackdropClick(event: MouseEvent<HTMLDivElement>) {
@@ -80,13 +107,12 @@ export function ChildFormDialog({
   return (
     <>
       <button type="button" onClick={openDialog} className={triggerClassName}>
-        {triggerIcon}
-        {triggerLabel}
+        {triggerContent}
       </button>
 
       <dialog
         ref={dialogRef}
-        aria-labelledby="child-form-title"
+        aria-labelledby={titleId}
         onClose={handleClose}
         onKeyDown={handleKeyDown}
         className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-transparent p-0 backdrop:bg-ink/45"
@@ -95,7 +121,9 @@ export function ChildFormDialog({
           onClick={handleBackdropClick}
           className="flex min-h-dvh items-start justify-center overflow-y-auto p-4 sm:px-6 sm:py-10"
         >
-          {children}
+          <FormDialogContext.Provider value={closeDialog}>
+            {children}
+          </FormDialogContext.Provider>
         </div>
       </dialog>
     </>
