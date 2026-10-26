@@ -155,7 +155,9 @@ Dos tokens nuevos en `@theme` de `app/globals.css`:
 | `--color-post-type-nap-bg` | `#e7dcf6` | fondo del chip Siesta inactivo                          |
 | `--color-post-type-nap-fg` | `#7b5fc0` | texto del chip Siesta inactivo y fondo del activo       |
 
-Tokens existentes reutilizados: `auth-bg` (#FBF4EC, tarjeta), `border`, `auth-input-border`, `shadow-dialog`, `muted`, `ink`, `nav`, `surface`, `eyebrow` (#D9583C, "Publicar"), `coral` (foco), `placeholder`, `divider`, `photo-bg`, `photo-border`, `photo-text`, `coral-link`, `error`, `badge-pending*`, `badge-activity*`, `badge-achievement*`, `badge-announcement*`, `tag-link-*`, `tag-allergy-*`, `child-*-bg/fg` (avatares).
+Tokens existentes reutilizados: `auth-bg` (#FBF4EC, tarjeta), `border`, `auth-input-border`, `shadow-dialog`, `muted`, `ink`, `nav`, `surface`, `eyebrow` (#D9583C, "Publicar"), `coral` (foco), `divider`, `photo-bg`, `photo-border`, `photo-text`, `coral-link`, `error`, `badge-pending*`, `badge-activity*`, `badge-achievement*`, `badge-announcement*`, `tag-link-*`, `tag-allergy-*`, `child-*-bg/fg` (avatares).
+
+El token `placeholder` (#B6A99B) **no** se consume: el mockup pinta el `::placeholder` en ese color, pero en la app nadie lo aplica desde SPEC 03 (login), SPEC 04 y SPEC 05 tampoco. El textarea del composer hereda el color por defecto del navegador, igual que el resto de los formularios. Queda como pendiente compartido, no como deuda de esta spec.
 
 Medidas del modal (mockup a 1440, tarjeta de 580):
 
@@ -169,7 +171,7 @@ Medidas del modal (mockup a 1440, tarjeta de 580):
 - Chip de niño: `flex items-center gap-2 rounded-full border-[1.5px] py-1.5 pl-1.5 pr-3.5 text-sm font-bold`, avatar `ChildAvatar size="xs"` (26px). Activo `border-ink bg-ink text-white`; inactivo `border-border bg-surface text-nav`. El avatar conserva su tono en ambos estados.
 - Chip "Toda la sala": mismo estilo sin avatar, `px-4 py-1.5 text-sm font-bold`.
 - Chip de tipo: `rounded-full px-4 py-2 text-[13.5px] font-extrabold`, sin borde, anillo de foco coral.
-- Textarea: `min-h-[120px] resize-y rounded-[14px] border-[1.5px] border-auth-input-border bg-white px-4 py-[14px] text-[15px] leading-[1.5]`, `focus:border-coral`. Contador `text-[12px] font-extrabold text-muted`, `text-error` al pasarse de 600.
+- Textarea: `min-h-[120px] resize-y rounded-[14px] border-[1.5px] border-auth-input-border bg-white px-4 py-[13px] text-[15px] leading-[1.5]`, `focus:border-coral`. El padding vertical es `13px` (viene de `CONTROL_CLASS` de `FormTextArea`, compartido con SPEC 04/05); el mockup usa `14px` y la diferencia de 1px se acepta para no tocar la primitiva. Contador `text-[12px] font-extrabold text-muted`, `text-error` al pasarse de 600.
 - Fotos: azulejos `size-24 rounded-[14px]`. Preview `relative overflow-hidden border border-border bg-photo-bg` con `<img className="size-full object-cover">` y botón de quitar `absolute right-1 top-1 size-6 rounded-full bg-ink/70 text-white`. Azulejo "Agregar": `flex flex-col items-center justify-center gap-1.5 border-[1.5px] border-dashed border-photo-border bg-photo-bg text-[12px] text-photo-text`, `PlusIcon` 22px `text-coral-link`. Se oculta con 4 fotos.
 - Foco: `focus-visible:ring-2 focus-visible:ring-coral` en chips, azulejos, botones y CTA; offset 2px en header y azulejos.
 
@@ -322,3 +324,61 @@ Específicas de esta spec:
 - Borradores, toasts, estados de carga y de éxito.
 - Destinatarios que no sean niños de la sala o "Toda la sala".
 - Edición desde los enlaces "Editar" de cada publicación.
+
+## Verification report
+
+- **Fecha:** 2026-10-26 · **Branch:** `spec-06-crear-publicacion-modal` (HEAD `33be244`)
+- **Comandos:** `npm run build` → exit 0, "Compiled successfully", TypeScript OK, 6 rutas (`/`, `/_not-found`, `/activar-cuenta`, `/login`, `/ninos`, `/ninos/[id]`: las mismas que antes de la spec). `npx tsc --noEmit` → exit 0 sin salida. `npx eslint app` → exit 0 sin salida.
+- **Context7:** `/vercel/next.js` confirma que con Cache Components hay que quitar el export `runtime` y que no se usa `dynamic`/`revalidate`/`fetchCache` (docs: `route-segment-config/runtime.mdx`, `migrating-to-cache-components.mdx`). `/react/react` confirma `ref` como prop en React 19 y la firma de `useImperativeHandle(ref, create, deps)`, que es lo que hace `ui/modal-dialog.tsx`. Grep en `app/`: 0 coincidencias de `dynamic`, `revalidate`, `fetchCache`, `runtime`, `any`, `@ts-ignore` o `style={{`.
+- **Runtime:** dev server en `localhost:3000`, Chromium 1440×900 y 390×600.
+- **Consola:** 0 errores, 0 warnings de React con el modal abierto y cerrado (la única warning vista antes del reinicio del server era el `preload` de una fuente, previa a esta spec).
+
+| #  | Criterio | Estado | Evidencia |
+| -- | -------- | ------ | --------- |
+| 1  | `npm run build` sin errores | PASS | exit 0, "Compiled successfully in 2.5s" |
+| 2  | `npx tsc --noEmit` sin errores | PASS | exit 0, sin salida |
+| 3  | `npx eslint app` sin errores | PASS | exit 0, sin salida |
+| 4  | Consola limpia en `/` | PASS | `browser_console_messages(warning)`: Errors 0, Warnings 0 abriendo y cerrando el modal |
+| 5  | `app/` no importa `references/` | PASS | grep `references/` en `app/**`: 0 coincidencias |
+| 6  | Sin rutas nuevas ni cambios en `proxy.ts` | PASS | salida de build con las 6 rutas previas; `git show --stat 65be3cd` no toca `proxy.ts` |
+| 7  | Un solo `<dialog>` en `/` | PASS | `document.querySelectorAll('dialog').length === 1` con el modal cerrado y con 3 disparadores |
+| 8  | Los 3 disparadores son `button[type=button]` y no cambian la URL | PASS | los 3 reports `type:"button"`, `insideA:false`; `location.pathname === '/'` tras el clic |
+| 9  | El composer ya no es `<a>` y conserva su diseño | PASS | `composerTag:"BUTTON"`; captura `verify-spec-06-feed-composer.png` con avatar, texto e icono de cámara |
+| 10 | `aria-labelledby` + `<h2>` "Nueva publicación" | PASS | `dialog.getAttribute('aria-labelledby')==='post-form-title'`; `h2#post-form-title` con ese texto |
+| 11 | Header en orden Cancelar / título / Publicar | PASS | `header.innerText` = "Cancelar \| Nueva publicación \| Publicar" |
+| 12 | Labels `PARA`, `TIPO`, `DESCRIPCIÓN`, `FOTOS` | PASS | los cuatro presentes en el texto del formulario |
+| 13 | 9 chips (8 niños + sala) en orden con su inicial | PASS | valores `mateo-fernandez … olivia-vega, room` en orden; textos "MMateo", "SSofía", "BBenjamín", "VValentina", "TTomás", "EEmma", "LLucas", "OOlivia", "Toda la sala" |
+| 14 | Al abrir nada activo y placeholder correcto | PASS | `audience:[]`, `types:[]`, `description:""`, placeholder "Contá cómo le fue hoy…" |
+| 15 | Foco inicial en el primer chip | PASS | `document.activeElement.id === 'post-audience-mateo-fernandez'` al abrir |
+| 16 | Clic en sala deja solo ese chip activo | PASS | `roomOnly:["room"]`; sala `bg rgb(63,54,46)` + texto blanco, Mateo `bg rgb(255,253,249)` y `checked:false` |
+| 17 | Con sala + tipo + descripción, publicar no da error de destinatarios y cierra | PASS | `audience:null` en el submit y `dialog.open === false` después (equivale a los 8 ids internos) |
+| 18 | Con sala activa, tocar un niño deja solo ese niño | PASS | `roomThenChild:["sofia-mendez"]` |
+| 19 | Con un niño, tocar sala desactiva los niños | PASS | `childrenThenRoom:["room"]` |
+| 20 | Desmarcar los dos y publicar → error con foco en el primer chip | PASS | `twoChildren:["mateo-fernandez","sofia-mendez"]` → `oneChild` → `noChildren:[]` → "Elegí al menos un destinatario." con foco en `post-audience-mateo-fernandez` |
+| 21 | El TIPO admite exactamente uno | PASS | `typeSingle:["mood"]` y tras cambiar `typeSwitch:["photo"]` |
+| 22 | Activo sólido con texto blanco, inactivo pastel | PASS | Siesta activo `rgb(123,95,192)` + `rgb(255,255,255)`; Comida inactivo `rgb(247,231,166)` + `rgb(154,123,30)`; los 7 pares coinciden con el mockup |
+| 23 | Publicar sin TIPO muestra su mensaje | PASS | "Elegí un tipo de publicación." |
+| 24 | Publicar con descripción vacía | PASS | "Contá cómo le fue hoy." |
+| 25 | Publicar con 5 caracteres | PASS | "La descripción debe tener al menos 10 caracteres." con contador "5/600" |
+| 26 | Contador y máximo | PASS | "0/600" al abrir, "601/600" con contador `rgb(197,80,58)` y "La descripción no puede superar los 600 caracteres."; sin atributo `maxlength` |
+| 27 | Enviar vacío muestra los 3 errores y enfoca el primer chip | PASS | `emptySubmit` con los tres mensajes, foco en `post-audience-mateo-fernandez`, modal sigue abierto y `aria-describedby="post-audience-error"` |
+| 28 | Cada error desaparece al corregir sin reenviar | PASS | `audienceErrorCleared.audience:null` (y `typeStill` intacto), `typeError:null` al elegir tipo, `validDesc.error:null` al escribir 42 caracteres |
+| 29 | PDF rechazado con su mensaje | PASS | `pdf:{previews:3, error:"Solo podés subir imágenes JPG, PNG o WebP."}` |
+| 30 | Archivo de 6 MB rechazado | PASS | `big:{previews:3, error:"Cada foto debe pesar menos de 5 MB."}` |
+| 31 | 5 archivos válidos → 4 + mensaje | PASS | `afterFive:{previews:4, error:"Podés agregar hasta 4 fotos."}` |
+| 32 | Con 4 fotos el azulejo "Agregar" no se renderiza | PASS | `addTile:false` con 4 previews; vuelve con 3 |
+| 33 | Se puede quitar cada preview | PASS | `afterRemove:{previews:3}` y los `alt` renumerados |
+| 34 | Sin peticiones de red, previews `blob:` | PASS | `photoRequests: []` durante toda la carga; `blob:true` en las 4 fuentes |
+| 35 | Cancelar cierra sin validar y sin errores | PASS | `dialog.open === false` y `alerts:0` al cerrar |
+| 36 | Escape y clic en el scrim cierran | PASS | `escapeClosed` y `scrimClosed` con `open:false` |
+| 37 | Al reabrir no queda nada cargado | PASS | `reopenedEmpty: {audience:0, types:0, description:"", counter:"0/600", previews:0, alerts:0}` |
+| 38 | 390×600 entra, scrollea, hace wrap y sin scroll horizontal | PASS | `scrollWidth 380 < innerWidth 390`, tarjeta 348px con margen izquierdo 16px, `formScrolls:true`, 5 filas de chips, título en una línea (16px, alto 24px) |
+| 39 | Los modales de niño y padre siguen funcionando | PASS | niño: `open:1`, `aria-labelledby="child-form-title"`, foco `child-name`, y `#child-name` queda vacío al reabrir tras Escape; padre: `open:1`, `parent-invite-title`, foco `parent-name`, 1 parentesco marcado, cierra con Escape |
+
+- **Medidas contrastadas contra el mockup (no hay PNG de referencia para esta pantalla):** tarjeta `max-width:580px` real 580px, radio 24px, fondo `rgb(251,244,236)`, borde `1px #ECE0D0`, sombra `rgba(63,54,46,.35) 0 20px 50px -24px`; header `20px 26px` con borde inferior; cuerpo `24px 26px`; label `12px/800`, `letter-spacing .7px`, `rgb(148,136,123)`, `margin-bottom 10px`; gap de chips 9px con wrap; avatar del chip 26px Fredoka `13px/600`; chip de tipo `8px 16px`, `13.5px/800`, sin borde; textarea `min-height 120px`, radio 14px, `15px` con `line-height 22.5px`, `resize: vertical`; azulejo de foto 96×96 radio 14px borde `dashed rgb(219,205,186)`; `::backdrop` en `color-mix(in oklab, var(--color-ink) 45%, transparent)`; `max-height` de la tarjeta `868px = 100dvh - 32px`.
+- **Foco visible por teclado:** Tab desde el primer chip lleva a `post-audience-sofia-mendez` con anillo `rgb(242,147,122)` y offset blanco de 2px.
+- **Capturas en `.playwright-mcp/`:** `verify-spec-06-1440.png`, `verify-spec-06-390.png`, `verify-spec-06-mockup.png` (el HTML de referencia renderizado), `verify-spec-06-feed-composer.png`, más `spec-06-desktop.png` y `spec-06-mobile.png` de la corrida de implementación.
+- **Comparación visual vs el mockup renderizado:** coinciden header, estilo de chips (pastelpill, avatar tono, activo en tinta), paleta de los 7 tipos, textarea y azulejo punteado. Diferencias esperadas y decididas en la spec: 8 chips de niño en lugar de 3 (PARA ocupa 3 filas), un único tipo sólido (el mockup pinta Comida y Actividad sólidos porque es una maqueta estática), contador `91/600` agregado y el azulejo de foto previa del mockup no aparece hasta cargar una imagen real.
+- **Archivos tocados en esta verificación:** solo `specs/06-crear-publicacion-modal.md` (ajuste de la medida del textarea, nota del token `placeholder` y este reporte). Sin cambios de código: ningún criterio falló.
+- **Pendientes y riesgos:** (1) el `::placeholder` de toda la app sigue sin usar el token `placeholder` del mockup, heredado de SPEC 03/04/05; (2) el padding vertical del textarea es 13px por reutilizar `CONTROL_CLASS`, 1px menos que el mockup; (3) el modal queda montado en `(app)/layout.tsx`, así que `/ninos` y los perfiles también lo cargan (1 `<dialog>` extra por página, invisible, con su formulario en el bundle cliente); (4) "Publicar" no persiste nada: la siguiente spec de feed tendrá que conectar este formulario con la creación real.
+- **Nota de entorno:** el dev server de `localhost:3000` quedó levantado por esta corrida; conviene reiniciarlo después de tocar `@theme` en `globals.css`, porque Turbopack no regenera las utilidades de los tokens nuevos hasta reiniciar.
