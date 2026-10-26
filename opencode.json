@@ -1,5 +1,11 @@
 {
   "$schema": "https://opencode.ai/config.json",
+  "permission": {
+    "external_directory": {
+      "/tmp/**": "allow"
+    },
+    "bash": "allow"
+  },
   "mcp": {
     "servers": {
       "playwright": {
