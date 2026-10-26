@@ -1,12 +1,14 @@
 import type {
   InputHTMLAttributes,
+  ReactNode,
   SelectHTMLAttributes,
   TextareaHTMLAttributes,
 } from "react";
 import { ChevronDownIcon } from "@/app/_components/icons";
 
-const LABEL_CLASS =
-  "mb-2 block text-[12px] font-extrabold tracking-[.7px] text-muted";
+const LABEL_BASE = "text-[12px] font-extrabold tracking-[.7px] text-muted";
+
+const LABEL_CLASS = `mb-2 block ${LABEL_BASE}`;
 
 const CONTROL_CLASS =
   "w-full rounded-[14px] border-[1.5px] bg-white px-4 py-[13px] text-[15px] text-ink outline-none focus-visible:ring-2 focus-visible:ring-coral/30";
@@ -68,25 +70,39 @@ type FormTextAreaProps = {
   id: string;
   label: string;
   error?: string;
+  labelEnd?: ReactNode;
+  className?: string;
 } & Omit<TextareaHTMLAttributes<HTMLTextAreaElement>, "className" | "id">;
 
 export function FormTextArea({
   id,
   label,
   error,
+  labelEnd,
+  className,
   ...textareaProps
 }: FormTextAreaProps) {
+  const describedBy = [
+    textareaProps["aria-describedby"],
+    error ? `${id}-error` : undefined,
+  ]
+    .filter(Boolean)
+    .join(" ");
+
   return (
     <div>
-      <label htmlFor={id} className={LABEL_CLASS}>
-        {label}
-      </label>
+      <div className="mb-2 flex items-baseline justify-between gap-3">
+        <label htmlFor={id} className={LABEL_BASE}>
+          {label}
+        </label>
+        {labelEnd}
+      </div>
       <textarea
         {...textareaProps}
         id={id}
         aria-invalid={error ? true : undefined}
-        aria-describedby={describedBy(id, error)}
-        className={`${controlClassName(Boolean(error))} min-h-[90px] resize-y leading-[1.5]`}
+        aria-describedby={describedBy === "" ? undefined : describedBy}
+        className={`${controlClassName(Boolean(error))} resize-y leading-[1.5] ${className ?? "min-h-[90px]"}`}
       />
       <FieldError id={id} error={error} />
     </div>

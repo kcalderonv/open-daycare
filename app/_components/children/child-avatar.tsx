@@ -9,6 +9,7 @@ const TONE_STYLES: Record<ChildTone, string> = {
 };
 
 const SIZE_STYLES = {
+  xs: "size-[26px] text-[13px]",
   sm: "size-12 text-[19px]",
   lg: "size-[84px] text-[34px]",
 } as const;
