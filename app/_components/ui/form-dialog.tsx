@@ -54,7 +54,17 @@ export function FormDialog({
   }
 
   function closeDialog() {
-    dialogRef.current?.close();
+    const dialog = dialogRef.current;
+
+    if (!dialog) {
+      return;
+    }
+
+    dialog.close();
+    // Chromium queues the dialog's `close` event as an element task, which can
+    // land after the dialog is reopened. Clearing in the same tick keeps the
+    // reset deterministic for every programmatic close.
+    dialog.querySelector("form")?.reset();
   }
 
   function handleBackdropClick(event: MouseEvent<HTMLDivElement>) {

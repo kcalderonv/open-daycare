@@ -245,50 +245,50 @@ Específicas de esta spec:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` termina sin errores y no registra rutas nuevas.
-- [ ] `npx tsc --noEmit` sin errores.
-- [ ] `npx eslint app` sin errores.
-- [ ] La consola del navegador no muestra errores ni warnings de React en `/ninos` ni en `/ninos/mateo-fernandez` al abrir, enviar inválido y cerrar los dos modales.
-- [ ] `app/` no importa nada de `references/`.
-- [ ] `grep -rln '"use client"' app/` devuelve exactamente 6 archivos: `app-sidebar-nav.tsx`, `consent-checkbox.tsx`, `children-search.tsx`, `ui/form-dialog.tsx`, `children/child-form.tsx` y `children/parent-invite-form.tsx`; `ui/form-field.tsx` no aparece.
-- [ ] `app/_components/children/child-form-dialog.tsx` y `app/_components/children/child-form-field.tsx` no existen; `app/_components/ui/form-dialog.tsx` y `app/_components/ui/form-field.tsx` sí.
-- [ ] `FormDialog` se usa exactamente en tres lugares: `ninos/page.tsx`, `child-profile-header.tsx` y `child-parents-card.tsx`.
-- [ ] En `/ninos/mateo-fernandez`, "Vincular otro padre" es un `<button type="button">` cuyo nombre accesible contiene "Vincular otro padre" y no modifica la URL al hacer clic.
-- [ ] El clic abre un `<dialog>` con `open === true`, `aria-labelledby="parent-invite-title"`, el `<h2>` "Vincular padre" y el subtítulo "a Mateo Fernández".
-- [ ] El modal muestra los literales: "Le enviaremos un correo con un código para que active su cuenta. Solo verá el feed de Mateo.", `NOMBRE DEL PADRE/MADRE`, `EMAIL`, `PARENTESCO`, `CÓDIGO DE INVITACIÓN`, `Vence en 7 días` y "Enviar invitación".
-- [ ] Los placeholders son literales: "Ej. Diego Fernández" y "correo@ejemplo.com".
-- [ ] El código visible es "7K4P9", no es un `<input>` y no se puede editar.
-- [ ] `#parent-name` tiene el foco al abrir el modal.
-- [ ] PARENTESCO renderiza tres radios (`mother`/`father`/`guardian`) con labels "Mamá", "Papá" y "Tutor/a"; exactamente uno está marcado al abrir y el marcado es `mother`.
-- [ ] Al hacer clic en "Papá" queda un solo radio marcado (`father`) y "Mamá" deja de estarlo.
-- [ ] Enviar el formulario vacío no cierra el modal, muestra exactamente dos errores (nombre y email), ambos controles tienen `aria-invalid="true"` y el foco queda en `#parent-name`.
-- [ ] Enviar `diego@` en el email muestra "Ingresá un email válido.", mantiene el modal abierto y `aria-describedby` del input apunta al `<p role="alert">` del mensaje.
-- [ ] Un email válido como `diego.fernandez+test@example.com` no produce error de formato.
-- [ ] Con nombre "Diego Fernández" y email "correo@ejemplo.com", "Enviar invitación" cierra el modal, la URL sigue en `/ninos/mateo-fernandez` y la tarjeta de padres conserva exactamente las mismas filas y badges.
-- [ ] Al reabrir después de un envío válido, los campos están vacíos, el parentesco vuelve a "Mamá" y no queda ningún error visible.
-- [ ] El botón X cierra el modal con el formulario vacío y no muestra errores.
-- [ ] Escape cierra el modal y el foco vuelve al disparador "Vincular otro padre"; el clic en el scrim cierra y el clic dentro de la tarjeta no.
-- [ ] Tab cicla dentro del modal de invitación y dentro del de niño, sin que el foco salga a la página.
-- [ ] Medidas por computed style en el modal de invitación: tarjeta `max-width 480px`, radio `24px`, fondo `rgb(251,244,236)`, borde `1px rgb(236,224,208)`, sombra `0 20px 50px -24px rgba(63,54,46,.35)`.
-- [ ] Aviso: fondo `rgb(227,236,251)`, radio `14px`, padding `13px 16px`, texto `rgb(63,86,148)` 13.5px con `line-height 1.45`, icono 20px `rgb(78,114,200)`.
-- [ ] Chips: activo con fondo `rgb(204,216,244)`, borde `1.5px rgb(159,184,236)` y texto `rgb(78,114,200)`; inactivo con fondo `rgb(255,253,249)`, borde `rgb(236,224,208)` y texto `rgb(110,99,89)`; radio `999px` y padding `11px`.
-- [ ] Panel de código: fondo `rgb(251,241,214)`, borde discontinuo `1.5px rgb(230,208,138)`, radio `16px`, padding `18px`; código Fredoka 34px/600 con `letter-spacing 7px` y color `rgb(138,114,52)`; label y nota `rgb(168,133,38)`.
-- [ ] CTA: fondo con gradiente `rgb(244,151,126) → rgb(238,129,100)`, radio `14px`, padding `14px`, texto blanco `15.5px/800`, sombra `0 10px 22px -8px rgba(238,129,100,.7)` e icono de 19px.
-- [ ] Botón X: `34×34`, radio `10px`, fondo `rgb(240,230,216)`, icono `rgb(148,135,123)`.
-- [ ] Título y subtítulo en Fredoka y Nunito respectivamente (`document.fonts.check` para 600 18px Fredoka y 400 13px Nunito).
-- [ ] En `/ninos`, enviar el formulario de niño vacío no lo cierra, marca `#child-name` y `#child-birth-date` con `aria-invalid="true"` y enfoca `#child-name`; la sala no muestra error.
-- [ ] Nombre "A" → "El nombre debe tener al menos 2 caracteres."; "Mateo 123" → "Usá solo letras y espacios en el nombre.".
-- [ ] Fechas inválidas: "12-03-2022" → formato; "31/02/2023" → fecha válida; "01/01/2030" → no futura; "12/03/2022" no produce error.
-- [ ] 121 caracteres en alergias y 501 en notas producen sus mensajes de longitud; 120 y 500 no.
-- [ ] Corregir un campo con error hace desaparecer su mensaje sin volver a enviar; tipear en un campo sin error no muestra mensajes.
-- [ ] Enviar el formulario de niño con "Martina López" y "12/03/2022" cierra el modal y `/ninos` sigue mostrando las mismas 8 tarjetas en el mismo orden.
-- [ ] El modal de edición de Mateo precarga los cinco valores de SPEC 04 y valida igual que el alta; "Guardar" con fecha vacía no cierra y marca la fecha.
-- [ ] Cerrar el modal de niño después de un envío inválido y reabrirlo muestra los campos precargados/vacíos según el modo y sin errores.
-- [ ] `/ninos` y `/ninos/[id]` siguen siendo server components y `/ninos/agregar` sigue respondiendo 404.
-- [ ] A 390×600 los dos modales dejan 16px de margen, scrollean por dentro si no entran, los tres chips caben en una fila y `documentElement.scrollWidth` no supera `innerWidth`.
-- [ ] Capturas en `.playwright-mcp/parent-invite-1440.png`, `.playwright-mcp/parent-invite-390.png`, `.playwright-mcp/child-form-validation-1440.png` y `.playwright-mcp/mock-vincular-padre-1440.png`, comparadas contra el render del mockup: sin diferencias de layout, color ni tipografía en la tarjeta.
-- [ ] Ningún identificador nuevo está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
-- [ ] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
+- [x] `npm run build` termina sin errores y no registra rutas nuevas.
+- [x] `npx tsc --noEmit` sin errores.
+- [x] `npx eslint app` sin errores.
+- [x] La consola del navegador no muestra errores ni warnings de React en `/ninos` ni en `/ninos/mateo-fernandez` al abrir, enviar inválido y cerrar los dos modales.
+- [x] `app/` no importa nada de `references/`.
+- [x] `grep -rln '"use client"' app/` devuelve exactamente 6 archivos: `app-sidebar-nav.tsx`, `consent-checkbox.tsx`, `children-search.tsx`, `ui/form-dialog.tsx`, `children/child-form.tsx` y `children/parent-invite-form.tsx`; `ui/form-field.tsx` no aparece.
+- [x] `app/_components/children/child-form-dialog.tsx` y `app/_components/children/child-form-field.tsx` no existen; `app/_components/ui/form-dialog.tsx` y `app/_components/ui/form-field.tsx` sí.
+- [x] `FormDialog` se usa exactamente en tres lugares: `ninos/page.tsx`, `child-profile-header.tsx` y `child-parents-card.tsx`.
+- [x] En `/ninos/mateo-fernandez`, "Vincular otro padre" es un `<button type="button">` cuyo nombre accesible contiene "Vincular otro padre" y no modifica la URL al hacer clic.
+- [x] El clic abre un `<dialog>` con `open === true`, `aria-labelledby="parent-invite-title"`, el `<h2>` "Vincular padre" y el subtítulo "a Mateo Fernández".
+- [x] El modal muestra los literales: "Le enviaremos un correo con un código para que active su cuenta. Solo verá el feed de Mateo.", `NOMBRE DEL PADRE/MADRE`, `EMAIL`, `PARENTESCO`, `CÓDIGO DE INVITACIÓN`, `Vence en 7 días` y "Enviar invitación".
+- [x] Los placeholders son literales: "Ej. Diego Fernández" y "correo@ejemplo.com".
+- [x] El código visible es "7K4P9", no es un `<input>` y no se puede editar.
+- [x] `#parent-name` tiene el foco al abrir el modal.
+- [x] PARENTESCO renderiza tres radios (`mother`/`father`/`guardian`) con labels "Mamá", "Papá" y "Tutor/a"; exactamente uno está marcado al abrir y el marcado es `mother`.
+- [x] Al hacer clic en "Papá" queda un solo radio marcado (`father`) y "Mamá" deja de estarlo.
+- [x] Enviar el formulario vacío no cierra el modal, muestra exactamente dos errores (nombre y email), ambos controles tienen `aria-invalid="true"` y el foco queda en `#parent-name`.
+- [x] Enviar `diego@` en el email muestra "Ingresá un email válido.", mantiene el modal abierto y `aria-describedby` del input apunta al `<p role="alert">` del mensaje.
+- [x] Un email válido como `diego.fernandez+test@example.com` no produce error de formato.
+- [x] Con nombre "Diego Fernández" y email "correo@ejemplo.com", "Enviar invitación" cierra el modal, la URL sigue en `/ninos/mateo-fernandez` y la tarjeta de padres conserva exactamente las mismas filas y badges.
+- [x] Al reabrir después de un envío válido, los campos están vacíos, el parentesco vuelve a "Mamá" y no queda ningún error visible.
+- [x] El botón X cierra el modal con el formulario vacío y no muestra errores.
+- [x] Escape cierra el modal y el foco vuelve al disparador "Vincular otro padre"; el clic en el scrim cierra y el clic dentro de la tarjeta no.
+- [x] Tab cicla dentro del modal de invitación y dentro del de niño, sin que el foco salga a la página.
+- [x] Medidas por computed style en el modal de invitación: tarjeta `max-width 480px`, radio `24px`, fondo `rgb(251,244,236)`, borde `1px rgb(236,224,208)`, sombra `0 20px 50px -24px rgba(63,54,46,.35)`.
+- [x] Aviso: fondo `rgb(227,236,251)`, radio `14px`, padding `13px 16px`, texto `rgb(63,86,148)` 13.5px con `line-height 1.45`, icono 20px `rgb(78,114,200)`.
+- [x] Chips: activo con fondo `rgb(204,216,244)`, borde `1.5px rgb(159,184,236)` y texto `rgb(78,114,200)`; inactivo con fondo `rgb(255,253,249)`, borde `rgb(236,224,208)` y texto `rgb(110,99,89)`; radio `999px` y padding `11px`.
+- [x] Panel de código: fondo `rgb(251,241,214)`, borde discontinuo `1.5px rgb(230,208,138)`, radio `16px`, padding `18px`; código Fredoka 34px/600 con `letter-spacing 7px` y color `rgb(138,114,52)`; label y nota `rgb(168,133,38)`.
+- [x] CTA: fondo con gradiente `rgb(244,151,126) → rgb(238,129,100)`, radio `14px`, padding `14px`, texto blanco `15.5px/800`, sombra `0 10px 22px -8px rgba(238,129,100,.7)` e icono de 19px.
+- [x] Botón X: `34×34`, radio `10px`, fondo `rgb(240,230,216)`, icono `rgb(148,135,123)`.
+- [x] Título y subtítulo en Fredoka y Nunito respectivamente (`document.fonts.check` para 600 18px Fredoka y 400 13px Nunito).
+- [x] En `/ninos`, enviar el formulario de niño vacío no lo cierra, marca `#child-name` y `#child-birth-date` con `aria-invalid="true"` y enfoca `#child-name`; la sala no muestra error.
+- [x] Nombre "A" → "El nombre debe tener al menos 2 caracteres."; "Mateo 123" → "Usá solo letras y espacios en el nombre.".
+- [x] Fechas inválidas: "12-03-2022" → formato; "31/02/2023" → fecha válida; "01/01/2030" → no futura; "12/03/2022" no produce error.
+- [x] 121 caracteres en alergias y 501 en notas producen sus mensajes de longitud; 120 y 500 no.
+- [x] Corregir un campo con error hace desaparecer su mensaje sin volver a enviar; tipear en un campo sin error no muestra mensajes.
+- [x] Enviar el formulario de niño con "Martina López" y "12/03/2022" cierra el modal y `/ninos` sigue mostrando las mismas 8 tarjetas en el mismo orden.
+- [x] El modal de edición de Mateo precarga los cinco valores de SPEC 04 y valida igual que el alta; "Guardar" con fecha vacía no cierra y marca la fecha.
+- [x] Cerrar el modal de niño después de un envío inválido y reabrirlo muestra los campos precargados/vacíos según el modo y sin errores.
+- [x] `/ninos` y `/ninos/[id]` siguen siendo server components y `/ninos/agregar` sigue respondiendo 404.
+- [x] A 390×600 los dos modales dejan 16px de margen, scrollean por dentro si no entran, los tres chips caben en una fila y `documentElement.scrollWidth` no supera `innerWidth`.
+- [x] Capturas en `.playwright-mcp/parent-invite-1440.png`, `.playwright-mcp/parent-invite-390.png`, `.playwright-mcp/child-form-validation-1440.png` y `.playwright-mcp/mock-vincular-padre-1440.png`, comparadas contra el render del mockup: sin diferencias de layout, color ni tipografía en la tarjeta.
+- [x] Ningún identificador nuevo está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
+- [x] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
 
 ## Decisions
 
@@ -345,3 +345,135 @@ Específicas de esta spec:
 - Modo oscuro y rediseño mobile más allá de la degradación descrita.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+**Fecha:** 2026-10-26 · **Branch:** `spec-05-vincular-padre-y-validaciones` · **Commit de partida:** `7704c67 "05-vincular-padre"` · **Agente:** `spec-verifier`
+
+Punto de partida: `git status --short` vacío sobre `spec-05-vincular-padre-y-validaciones` (la implementación ya estaba commiteada). Al cerrar la corrida quedaron detenidos el dev de `:3000` (incluido un leftover de PID 15412 iniciado a las 11:16), el server de producción de `:3210` y el server de referencias de `:8971`.
+
+### Correcciones aplicadas en esta corrida
+
+El código no pasaba dos criterios. Ambos se corrigieron con el cambio mínimo y se reverificó después:
+
+1. **`app/_components/ui/form-dialog.tsx` — reset determinista (criterios 21, 22, 39).** `form.reset()` estaba solo en el handler de `onClose`. Chromium encola el evento `close` del `<dialog>` como *element task* y puede dispararse **después** de reabrir: midiendo con un listener nativo se vio `reopened value=ANA` y recién luego `native close event fired`. Al reabrir tras un envío válido quedaban el nombre tipeado y el radio "Papá". Se agregó el reset en el mismo tick de `closeDialog()`, conservando `onClose` para Escape. Evidencia post-fix: `rightAfterX: open=false name=[] checked=mother`, `rightAfterValidSubmit: open=false name=[] checked=mother`, `reopenAfterValid: name=[] checked=mother alerts=0`, y por Escape `name=[] checked=mother alerts=0`.
+2. **`app/_components/children/parent-invite-form.tsx` — radio del chip (criterio 27).** `rounded-full` de Tailwind 4 compila a `calc(infinity * 1px)` y el navegador reporta `3.35544e+07px`; el spec y el mockup fijan `999px`. Se cambió a `rounded-[999px]` y ahora mide `999px`, igual que el mockup.
+
+### Comandos ejecutados (con el código final)
+
+| Comando | Resultado |
+| --- | --- |
+| `npm run build` | ✅ exit 0 · `✓ Generating static pages using 9 workers (16/16)` · `/`, `/ninos` (○), `/ninos/[id]` (◐ PPR) y `ƒ Proxy (Middleware)`. Sin rutas nuevas. |
+| `npx tsc --noEmit` | ✅ exit 0, sin salida. |
+| `npx eslint app` | ✅ exit 0, sin salida. (`npm run lint` no se usa como señal: falla por `references/pantallas/support.js`, preexistente.) |
+| `Select-String '"use client"'` en `app/` | ✅ 6 archivos: `app-sidebar-nav.tsx`, `consent-checkbox.tsx`, `children-search.tsx`, `ui/form-dialog.tsx`, `children/child-form.tsx`, `children/parent-invite-form.tsx`. `ui/form-field.tsx` no aparece. |
+| `Select-String 'references'` en `app/` | ✅ 0 coincidencias. |
+| `Select-String ': any\|as any\|<any>\|@ts-ignore\|@ts-expect-error\|style=\{\{'` | ✅ 0 coincidencias. |
+| `Select-String '#[0-9a-fA-F]{3,8}'` en `.ts/.tsx` | ✅ 0 coincidencias. |
+| `Select-String 'export const (dynamic\|revalidate\|fetchCache\|runtime\|dynamicParams\|maxDuration)'` | ✅ 0 coincidencias. |
+| `<FormDialog` en `app/**/*.tsx` | ✅ exactamente 3 usos: `ninos/page.tsx`, `child-profile-header.tsx`, `child-parents-card.tsx`. |
+| `Test-Path` archivos movidos | ✅ `children/child-form-dialog.tsx` y `children/child-form-field.tsx` GONE; `ui/form-dialog.tsx` y `ui/form-field.tsx` EXISTS. |
+| `postcss.config.*` / `tailwind.config.*` | ✅ ninguno existe; Tailwind sigue por `@tailwindcss/turbopack` en `next.config.ts`. |
+| regex sobre `app/_data/children.ts` | ✅ 8 pares `name`/`firstName`, los 8 con `firstName` = primera palabra del nombre; `ParentRelationship` sigue `"mother" \| "father"` y `guardian` no aparece en los datos. |
+| `curl` dev `:3000` | ✅ `/ninos` 200 · `/ninos/mateo-fernandez` 200 · `/ninos/agregar` **404** · `/ninos/no-existe` 404. |
+| `curl` prod `next start :3210` | ✅ `/ninos` 200 · `/ninos/mateo-fernandez` 200 · `/ninos/agregar` **404** · `/ninos/no-existe` 404. |
+
+Versiones: Next.js 16.4.3, React 19.3, Tailwind CSS 4.
+
+### Contraste Next.js (Context7 `/vercel/next.js` + docs vendorizadas 16.4.3)
+
+- **Cierre por contexto, no por props de función.** `node_modules/next/dist/docs/01-app/02-guides/server-and-client-boundary.md:160`: *"Data crosses through props, and it must be serializable, so functions like event handlers cannot cross"*, y `use-client.mdx`: *"function props ... cannot be passed from Server Components to Client Components"*. Por eso `useFormDialogClose()` vive en un provider de `FormDialog` y ningún page pasa un callback. Correcto.
+- **`children` server renderizado dentro de un client component.** `server-and-client-boundary.md:168` y `:198`: el `Modal` recibe `title` y `children` como elementos serializados. Es el patrón `<FormDialog><ChildForm/></FormDialog>` y `<FormDialog triggerContent={...}><ParentInviteForm child={child}/></FormDialog>`, con `child` como dato plano serializable. Correcto.
+- **Sin route segment configs.** `migrating-to-cache-components.mdx`: con `cacheComponents` activo, exportar `dynamic`, `revalidate`, `fetchCache`, `runtime` o `dynamicParams` es error de build. El grep devuelve 0 coincidencias y el build marca `/ninos/[id]` como ◐ PPR con `<Suspense>` + `params.then()`, intacto desde SPEC 02. Correcto.
+- **Convenciones del repo:** fuentes por `next/font/google` en `app/layout.tsx` (0 coincidencias de `fonts.googleapis` en `app/`), server components por defecto, `"use client"` acotado a los 6 archivos.
+
+### Criterios de aceptación (44/44 PASS)
+
+Evidencia runtime: Playwright sobre dev `:3000`, viewport 1440×900 salvo donde se indique. El mockup de referencia se sirvió en `127.0.0.1:8971` y se midió en el mismo navegador.
+
+| # | Criterio | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `npm run build` sin errores y sin rutas nuevas | PASS | exit 0, 16/16, mismas 6 entradas de ruta que SPEC 04. |
+| 2 | `npx tsc --noEmit` sin errores | PASS | exit 0. |
+| 3 | `npx eslint app` sin errores | PASS | exit 0. |
+| 4 | Consola sin errores ni warnings con los dos modales abiertos, envío inválido y cierre | PASS | `/ninos` y `/ninos/mateo-fernandez`: `Total messages: 4 (Errors: 0, Warnings: 0)` y `Total messages: 2 (Errors: 0, Warnings: 0)` tras abrir + submit inválido + Escape. |
+| 5 | `app/` no importa `references/` | PASS | grep: 0. |
+| 6 | `"use client"` en exactamente 6 archivos | PASS | listado arriba; `ui/form-field.tsx` ausente. |
+| 7 | Archivos viejos borrados, nuevos presentes | PASS | GONE/EXISTS arriba. |
+| 8 | `FormDialog` en 3 lugares | PASS | grep `<FormDialog`: `ninos/page.tsx`, `child-profile-header.tsx`, `child-parents-card.tsx`. |
+| 9 | "Vincular otro padre" es `<button type="button">` y no cambia la URL | PASS | `tag=BUTTON type=button name="Vincular otro padre"`, `urlBefore=urlAfter=/ninos/mateo-fernandez`. |
+| 10 | Abre `<dialog>` con `aria-labelledby`, `<h2>` y subtítulo | PASS | `open=true`, `labelledBy=parent-invite-title`, `h2="Vincular padre"`, `subtitle="a Mateo Fernández"`. |
+| 11 | Literales del copy | PASS | aviso completo "...Solo verá el feed de Mateo.", `NOMBRE DEL PADRE/MADRE`, `EMAIL`, `PARENTESCO` (legend), `CÓDIGO DE INVITACIÓN`, `Vence en 7 días`, `Enviar invitación`. |
+| 12 | Placeholders literales | PASS | `["Ej. Diego Fernández","correo@ejemplo.com"]`. |
+| 13 | Código "7K4P9" no editable | PASS | `tag=DIV`, `isContentEditable=false`, texto exacto. |
+| 14 | `#parent-name` con foco al abrir | PASS | `focusOnOpen=parent-name`. |
+| 15 | Tres radios con Mamá marcada y uno solo activo | PASS | `mother:true father:false guardian:false`, `checkedCount=1`, labels `["Mamá","Papá","Tutor/a"]`. |
+| 16 | Clic en "Papá" deja un solo marcado | PASS | `checked=mother:false father:true guardian:false`. |
+| 17 | Envío vacío: no cierra, 2 errores, `aria-invalid`, foco en nombre | PASS | `open=true`, `parent-name-error` + `parent-email-error`, `invalid=[true,true]`, `focus=parent-name`, `url=/ninos/mateo-fernandez`. |
+| 18 | `diego@` muestra el error de email y `aria-describedby` apunta al `role=alert` | PASS | `open=true alert="Ingresá un email válido." describedBy=parent-email-error`, `alertId=parent-email-error`. |
+| 19 | `diego.fernandez+test@example.com` no da error de formato | PASS | `open=false alerts=0` (el submit cerró). |
+| 20 | Envío válido cierra, URL intacta, tarjeta de padres igual | PASS | `open=false url=/ninos/mateo-fernandez parentsSame=true`; firma "Lucía Fernández Mamá · activa ACTIVA Diego Fernández Papá · invitación enviada PENDIENTE Vincular otro padre" idéntica antes y después. |
+| 21 | Reabrir tras envío válido: vacío, Mamá, sin errores | PASS | **requirió la corrección 1**. `reopenAfterValid: name=[] checked=mother alerts=0`. |
+| 22 | X cierra con formulario vacío y sin errores | PASS | `rightAfterX: open=false name=[] checked=mother alerts=0`. |
+| 23 | Escape cierra y devuelve el foco al disparador; scrim cierra; dentro no | PASS | `inviteEscape: open=false focus=BUTTON:Vincular otro padre`; `insideClick open=true`, `scrimClick open=false`. |
+| 24 | Tab cicla dentro de los dos modales | PASS | Invitación: desde el CTA → `Cerrar`, Shift+Tab → `Enviar invitación`. Niño: desde `#child-notes` → `Cancelar`, Shift+Tab → `child-notes`. |
+| 25 | Medidas de la tarjeta | PASS | `max-width 480px` (ancho real 480), radio `24px`, bg `rgb(251,244,236)`, borde `1px rgb(236,224,208)`, sombra `rgba(63,54,46,.35) 0 20px 50px -24px`; posición `left=480 top=40` igual que el mockup. |
+| 26 | Aviso | PASS | bg `rgb(227,236,251)`, radio `14px`, padding `13px 16px`, texto `rgb(63,86,148)` `13.5px` con `line-height 19.575px` (=1.45), icono 20px `rgb(78,114,200)`; ancho 426px = mockup. |
+| 27 | Chips | PASS | **requirió la corrección 2 (radio 999px)**. Activo `rgb(204,216,244)` / `rgb(159,184,236)` / `rgb(78,114,200)`; inactivo `rgb(255,253,249)` / `rgb(236,224,208)` / `rgb(110,99,89)`; `14px/800`, padding `11px`, radio `999px`, ancho 136px = mockup. Ver nota ① sobre el `1.5px`. |
+| 28 | Panel de código | PASS | bg `rgb(251,241,214)`, `dashed rgb(230,208,138)`, radio `16px`, padding `18px`; código `Fredoka 34px/600`, `letter-spacing 7px`, `rgb(138,114,52)`; label `12px/800/.7px` y nota `13px` en `rgb(168,133,38)`. |
+| 29 | CTA | PASS | `linear-gradient(rgb(244,151,126), rgb(238,129,100))`, radio `14px`, padding `14px`, blanco `15.5px/800`, sombra `rgba(238,129,100,.7) 0 10px 22px -8px`, icono `19px`, `gap 9px` — todos idénticos al mockup. |
+| 30 | Botón X | PASS | `34×34`, radio `10px`, bg `rgb(240,230,216)`, icono 18px `rgb(148,136,123)`. Ver nota ②: el spec pide `148,135,123` pero `#94887B` es `148,136,123` y el mockup mide exactamente eso. |
+| 31 | Fredoka en título, Nunito en campos | PASS | título `font-family Fredoka` 18px/600, subtítulo Nunito 13px; `document.fonts.check("600 18px Fredoka")` y `("400 13px Nunito")` → `true`. |
+| 32 | Niño vacío: bloquea, marca nombre y fecha, sala sin error | PASS | `alerts=child-name-error + child-birth-date-error`, `nameInvalid=true dateInvalid=true roomInvalid=null`, `focus=child-name`, `open=true`. |
+| 33 | "A" y "Mateo 123" | PASS | `"El nombre debe tener al menos 2 caracteres."` → `"Usá solo letras y espacios en el nombre."`. |
+| 34 | Fechas | PASS | `12-03-2022`→"Usá el formato dd/mm/aaaa."; `31/02/2023`→"Ingresá una fecha válida."; `01/01/2030`→"La fecha de nacimiento no puede ser futura."; `12/03/2022`→`alerts=0`. |
+| 35 | 121 y 501 pesan; 120 y 500 no | PASS | `child-allergies-error=Las alergias no pueden superar los 120 caracteres.` + `child-notes-error=...500...` con `open=true`; al bajar a 120/500 → `alerts=0`. |
+| 36 | Corregir limpia sin reenviar; tipear en campos limpios no muestra nada | PASS | `C33c+fix` deja solo el error de fecha; `C36 typing-clean-fields alerts=0` antes del submit. |
+| 37 | "Martina López" + "12/03/2022" cierra y el listado no cambia | PASS | `open=false url=/ninos cardsSame=true n=8`, orden mateo, sofia, benjamin, valentina, tomas, emma, lucas, olivia. |
+| 38 | Edición precarga los cinco valores y valida igual | PASS | `h2="Editar niño" name="Mateo Fernández" date="12/03/2022" room=soles allergies="MANÍ" notes="Alergia al maní. Evitar..."`; con fecha vacía `open=true alerts="Ingresá la fecha de nacimiento." focus=child-birth-date`. |
+| 39 | Reabrir tras envío inválido: precargado/vacío según modo, sin errores | PASS | **requirió la corrección 1**. `reopenEdit: date=12/03/2022 name=Mateo Fernández alerts=0`; `reopenCreate: name=[] room=soles alerts=0 focus=child-name`. |
+| 40 | `/ninos` y `/ninos/[id]` server components y `/ninos/agregar` 404 | PASS | ningún page tiene `"use client"`; build marca `/ninos` ○ y `/ninos/[id]` ◐; `curl` → 404 en dev **y** prod, con el resto en 200. |
+| 41 | 390×600 en los dos modales | PASS | Niño: `sw=380 iw=390 left=16 top=16 w=348 maxH=568px scroll=true`. Invitación: `sw=380 iw=390 left=16 top=16 w=348 maxH=568px scroll=true chipTops=431/431/431` (los tres chips en una fila, 89px c/u). En `child-form-390.png` se ve la fila fecha/sala apilada (SPEC 04 intacta). |
+| 42 | Capturas comparadas contra el mockup | PASS | App vs mock renderido en `:8971`, mismo navegador: tarjeta `left=480 top=40 w=480`, aviso 426px, chips 136px, panel, código, CTA, X, input y label con los mismos computed styles. Cero diferencias de layout, color o tipografía en la tarjeta. Ver notas ① y ③. |
+| 43 | Identificadores en inglés | PASS | Símbolos nuevos auditados: `FormDialog`, `FormDialogContext`, `useFormDialogClose`, `FormField`, `FormTextArea`, `FormSelect`, `controlClassName`, `describedBy`, `FieldError`, `ParentInviteForm`, `relationshipOptions`, `defaultRelationship`, `parentInvite`, `expiresLabel`, `FIELD_ORDER`, `VALIDATORS`, `validateName/Email/BirthDate/Allergies/Notes`, `InviteField`, `ChildField`, `ChildErrors`, `childFormDefaults`, `triggerContent`, `titleId`, `initialFocusId`, `firstName`, `InfoIcon`, `CloseIcon`, `SendIcon`. El español aparece solo en copy visible. |
+| 44 | Sin `any`, `@ts-ignore`, `style={{}}` ni hex en JSX | PASS | los cuatro grep: 0 coincidencias; 0 hex en `.ts/.tsx`. |
+
+### Notas de la corrida
+
+① **`border-[1.5px]` se mide `1px`.** Los criterios 27 y 28 piden `1.5px`, pero `getComputedStyle().borderTopWidth` reporta `1px`: es redondeo de layout de Chromium, no del CSS. El mockup, que declara `border:1.5px solid ...`, mide `1px` en el mismo navegador (`chips.active.border = "1px solid rgb(159,184,236)"`, `panel.border = "1px dashed rgb(230,208,138)"`), así que app y referencia coinciden.
+
+② **El `rgb(148,135,123)` del criterio 30 es un error aritmético del spec.** El token `--color-muted` es `#94887B` = `rgb(148,136,123)`; eso mide la app y eso mide el mockup renderizado. El código coincide con el diseño; el `135` no existe en ninguna parte.
+
+③ **Un solo delta visual esperado contra el mockup:** el input "NOMBRE DEL PADRE/MADRE" se ve con borde de foco y detrás de la tarjeta hay scrim `oklab(...)/0.45` sobre el perfil, mientras el mockup es una página suelta. Ninguno es defecto.
+
+④ **Aviso de dev-only sin impacto:** el log del dev server mostró `Fast Refresh had to perform a full reload when ./app/_components/ui/form-dialog.tsx changed` al editar el diálogo durante la corrida. Es una nota de Fast Refresh por cambiar el módulo que exporta el provider de contexto, no un error de la app; la consola del navegador quedó en 0 errores y 0 warnings.
+
+### Artefactos (en `.playwright-mcp/`, gitignored)
+
+- `parent-invite-1440.png` — modal de invitación limpio a 1440×900 (criterios 10–16, 25–31, 42).
+- `parent-invite-validation-1440.png` — el mismo modal con los dos errores inline (criterios 17, 26 nota, 42).
+- `parent-invite-390.png` — invitación a 390×600 con los tres chips en una fila (criterio 41).
+- `child-form-validation-1440.png` — modal de niño con errores de nombre y fecha (criterios 32–39).
+- `child-form-390.png` — modal de niño a 390×600 con la fila fecha/sala apilada (criterio 41).
+- `mock-vincular-padre-1440.png` — render de `references/pantallas/vincular-padre.dc.html` servido en `127.0.0.1:8971` (criterio 42).
+
+### Archivos modificados en esta corrida
+
+- `app/_components/ui/form-dialog.tsx`: reset del formulario en el mismo tick del cierre programático.
+- `app/_components/children/parent-invite-form.tsx`: `rounded-full` → `rounded-[999px]` en los chips.
+- `specs/05-vincular-padre-y-validaciones.md`: 44 casillas marcadas + esta sección.
+
+No se tocó `references/`, `proxy.ts`, `package.json`, configuración de lint ni de build. No se hizo commit ni push.
+
+### Propuestas de texto (pendientes de tu aprobación)
+
+1. **Criterio 30:** reemplazar `icono rgb(148,135,123)` por `icono rgb(148,136,123)` (= `#94887B`, el token `muted`, y lo que mide el mockup).
+2. **Criterios 27 y 28:** aclarar el `1.5px` como hace SPEC 04, por ejemplo *"borde `1.5px` con color `rgb(159,184,236)`; Chromium reporta `1px` por redondeo de layout y el mockup mide igual"*.
+3. **Risks, fila de `firstName`:** dice *"un criterio verifica los 8 pares"* pero no existe ese criterio en la lista. O se agrega el criterio (`firstName` coincide con la primera palabra de `name` en los 8 niños — verificado: 8/8) o se corrige la fila de riesgos.
+
+### Pendientes y riesgos
+
+- Nada funcional pendiente: 44/44 verificados con evidencia, tras dos correcciones.
+- Comportamiento documentado que cambia SPEC 04: **Enter** en un campo valida y cierra solo si es válido (antes cerraba como Cancelar). Está en el spec y no requiere acción.
+- Con todo en PASS corresponde pasar `**Status:**` a `Implementado` y commitear las dos correcciones junto con el spec. Los dos los hacés vos: el workflow nunca cambia el estado ni commitea por su cuenta.
+- Para volver a ver la pantalla: `npm run dev`.

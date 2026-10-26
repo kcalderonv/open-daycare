@@ -193,7 +193,7 @@ export function ParentInviteForm({ child }: { child: Child }) {
                   defaultChecked={option.value === defaultRelationship}
                   className="peer sr-only"
                 />
-                <span className="block cursor-pointer rounded-full border-[1.5px] border-border bg-surface p-[11px] text-center text-[14px] font-extrabold text-nav peer-checked:border-relationship-border peer-checked:bg-relationship-bg peer-checked:text-invite-blue peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2">
+                <span className="block cursor-pointer rounded-[999px] border-[1.5px] border-border bg-surface p-[11px] text-center text-[14px] font-extrabold text-nav peer-checked:border-relationship-border peer-checked:bg-relationship-bg peer-checked:text-invite-blue peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2">
                   {option.label}
                 </span>
               </label>
