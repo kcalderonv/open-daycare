@@ -14,6 +14,7 @@ export type Parent = {
 export type Child = {
   id: string;
   name: string;
+  firstName: string;
   initial: string;
   tone: ChildTone;
   ageLabel: string;
@@ -37,6 +38,7 @@ export const children: Child[] = [
   {
     id: "mateo-fernandez",
     name: "Mateo Fernández",
+    firstName: "Mateo",
     initial: "M",
     tone: "sky",
     ageLabel: "3 años",
@@ -67,6 +69,7 @@ export const children: Child[] = [
   {
     id: "sofia-mendez",
     name: "Sofía Méndez",
+    firstName: "Sofía",
     initial: "S",
     tone: "rose",
     ageLabel: "2 años",
@@ -86,6 +89,7 @@ export const children: Child[] = [
   {
     id: "benjamin-ruiz",
     name: "Benjamín Ruiz",
+    firstName: "Benjamín",
     initial: "B",
     tone: "sage",
     ageLabel: "3 años",
@@ -111,6 +115,7 @@ export const children: Child[] = [
   {
     id: "valentina-soto",
     name: "Valentina Soto",
+    firstName: "Valentina",
     initial: "V",
     tone: "sun",
     ageLabel: "2 años",
@@ -123,6 +128,7 @@ export const children: Child[] = [
   {
     id: "tomas-diaz",
     name: "Tomás Díaz",
+    firstName: "Tomás",
     initial: "T",
     tone: "lilac",
     ageLabel: "3 años",
@@ -147,6 +153,7 @@ export const children: Child[] = [
   {
     id: "emma-castro",
     name: "Emma Castro",
+    firstName: "Emma",
     initial: "E",
     tone: "rose",
     ageLabel: "2 años",
@@ -166,6 +173,7 @@ export const children: Child[] = [
   {
     id: "lucas-romero",
     name: "Lucas Romero",
+    firstName: "Lucas",
     initial: "L",
     tone: "sky",
     ageLabel: "3 años",
@@ -185,6 +193,7 @@ export const children: Child[] = [
   {
     id: "olivia-vega",
     name: "Olivia Vega",
+    firstName: "Olivia",
     initial: "O",
     tone: "sage",
     ageLabel: "2 años",

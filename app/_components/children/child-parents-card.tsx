@@ -1,5 +1,6 @@
-import Link from "next/link";
+import { ParentInviteForm } from "@/app/_components/children/parent-invite-form";
 import { PlusIcon } from "@/app/_components/icons";
+import { FormDialog } from "@/app/_components/ui/form-dialog";
 import type {
   Child,
   Parent,
@@ -73,7 +74,7 @@ function ParentRow({ parent }: { parent: Parent }) {
   );
 }
 
-export function ChildParentsCard({ parents }: { parents: Child["parents"] }) {
+export function ChildParentsCard({ child }: { child: Child }) {
   return (
     <div className="rounded-2xl border border-border bg-surface px-[18px] py-4">
       <div className="mb-3.5 text-[12.5px] font-extrabold tracking-[.8px] text-section-label">
@@ -81,18 +82,27 @@ export function ChildParentsCard({ parents }: { parents: Child["parents"] }) {
       </div>
 
       <div className="flex flex-col gap-3.5">
-        {parents.map((parent) => (
+        {child.parents.map((parent) => (
           <ParentRow key={parent.id} parent={parent} />
         ))}
 
-        <Link href="#" className="flex items-center gap-3 pt-2">
-          <span className="flex size-10 flex-none items-center justify-center rounded-full border-[1.5px] border-dashed border-avatar-empty-border text-photo-text">
-            <PlusIcon width={18} height={18} />
-          </span>
-          <span className="text-[14.5px] font-extrabold text-coral-link">
-            Vincular otro padre
-          </span>
-        </Link>
+        <FormDialog
+          triggerClassName="flex cursor-pointer items-center gap-3 pt-2 text-left focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+          titleId="parent-invite-title"
+          initialFocusId="parent-name"
+          triggerContent={
+            <>
+              <span className="flex size-10 flex-none items-center justify-center rounded-full border-[1.5px] border-dashed border-avatar-empty-border text-photo-text">
+                <PlusIcon width={18} height={18} />
+              </span>
+              <span className="text-[14.5px] font-extrabold text-coral-link">
+                Vincular otro padre
+              </span>
+            </>
+          }
+        >
+          <ParentInviteForm child={child} />
+        </FormDialog>
       </div>
     </div>
   );

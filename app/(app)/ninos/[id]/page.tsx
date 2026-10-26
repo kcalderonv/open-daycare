@@ -56,7 +56,7 @@ function ChildProfileContent({ id }: { id: string }) {
           Resumen del día
         </Link>
 
-        <ChildParentsCard parents={child.parents} />
+        <ChildParentsCard child={child} />
       </div>
     </div>
   );

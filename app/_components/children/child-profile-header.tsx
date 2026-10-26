@@ -1,6 +1,6 @@
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
 import { ChildForm } from "@/app/_components/children/child-form";
-import { ChildFormDialog } from "@/app/_components/children/child-form-dialog";
+import { FormDialog } from "@/app/_components/ui/form-dialog";
 import { room, type Child } from "@/app/_data/children";
 
 export function ChildProfileHeader({ child }: { child: Child }) {
@@ -17,12 +17,14 @@ export function ChildProfileHeader({ child }: { child: Child }) {
         </p>
       </div>
 
-      <ChildFormDialog
-        triggerLabel="Editar"
+      <FormDialog
+        triggerContent="Editar"
         triggerClassName="cursor-pointer rounded-xl border-[1.5px] border-border bg-surface px-4 py-[9px] text-[14px] font-bold text-nav focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+        titleId="child-form-title"
+        initialFocusId="child-name"
       >
         <ChildForm mode="edit" child={child} />
-      </ChildFormDialog>
+      </FormDialog>
     </div>
   );
 }
