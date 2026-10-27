@@ -451,44 +451,44 @@ Específicas de esta spec:
 
 ## Acceptance criteria
 
-- [ ] `list_migrations` incluye `create_child_status_enum`, `create_rooms`, `seed_rooms_demo`, `create_children` y `open_children_and_rooms_access`, y los cinco archivos de `supabase/migrations/` tienen el mismo `version`.
-- [ ] `list_tables({ schemas: ["public"], verbose: true })` muestra `rooms` con 6 columnas y `children` con 12 columnas, ambas con PK en `id` y `rls_enabled: true`.
-- [ ] `enum_range(null::public.child_status)` devuelve exactamente `{active,archived}`.
-- [ ] `select count(*) from public.rooms` devuelve `3`.
-- [ ] Las tres salas son `Soles`, `Lunas` y `Estrellas`, con `slug` `soles`/`lunas`/`estrellas`, `position` `1`/`2`/`3` y el mismo `daycare_id` que `sala-soles`.
-- [ ] `select count(*) from public.children` devuelve `0` al terminar las migraciones.
-- [ ] Re-ejecutar el `insert` del seed de salas dentro de una transacción con `rollback` deja el conteo en `3`.
-- [ ] `pg_constraint` contiene `rooms_daycare_slug_key`, `rooms_id_daycare_key`, `children_room_fkey` (compuesta `(room_id, daycare_id) → rooms(id, daycare_id)`), `children_full_name_length` y `children_allergy_tags_format`.
-- [ ] Existe el trigger `children_set_updated_at` apuntando a `public.set_updated_at()`.
-- [ ] Existen las policies `rooms_select_staff`, `children_select_staff`, `children_insert_staff` y `children_update_staff`; no existe ninguna policy de `DELETE` en `rooms` ni en `children`.
-- [ ] `information_schema.role_table_grants` no devuelve filas de `anon` para `rooms` ni `children`; `authenticated` tiene `SELECT` en `rooms` y `SELECT, INSERT, UPDATE` en `children`, sin `DELETE`.
-- [ ] `has_type_privilege('authenticated', 'public.child_status', 'usage')` es `true` y para `anon` es `false`.
-- [ ] `utils/supabase/database.types.ts` incluye `rooms`, `children` y el enum `child_status`.
-- [ ] `npm run build` termina sin errores.
-- [ ] `npx tsc --noEmit` termina sin errores.
-- [ ] `npx eslint app` termina sin errores.
-- [ ] La consola del navegador no muestra errores ni warnings de React en `/ninos`, en un perfil ni con el modal abierto y cerrado.
-- [ ] Con sesión de staff/admin, `/ninos` muestra tres secciones en orden `SALA SOLES`, `SALA LUNAS`, `SALA ESTRELLAS`, cada una con `0 niños` y el texto `Todavía no hay niños en esta sala.`
-- [ ] El `<select>` SALA del modal tiene exactamente tres opciones (`Soles`, `Lunas`, `Estrellas`) cuyos `value` son UUID reales de `public.rooms`, y la opción inicial es Soles.
-- [ ] Crear "Martina López", 15/04/2022, sala Soles, alergias "Maní, Lactosa" y notas "Lleva inhalador." desde `/ninos` cierra el modal, deja la tarjeta en `SALA SOLES`, cambia el contador a `1 niño` y muestra el badge `MANÍ` y la meta `{edad calculada} · sin padres vinculados`.
-- [ ] Tras ese alta, `select * from public.children` devuelve una fila con `full_name = 'Martina López'`, `birth_date = '2022-04-15'`, `room_id` de Soles, `allergy_tags = {peanut,lactose}`, `medical_notes = 'Lleva inhalador.'`, `enrolled_at = current_date`, `photo_consent = true`, `status = 'active'` y `daycare_id` de `sala-soles`.
-- [ ] Hacer clic en la tarjeta navega a `/ninos/{uuid}` y el perfil muestra "Martina López", la edad calculada, "Sala Soles", `15 abr 2022`, `Soles`, el mes y año de ingreso, y el panel "Alergias y notas" con `MANÍ, LACTOSA · Lleva inhalador.`.
-- [ ] El perfil de ese niño mantiene "PADRES VINCULADOS" sin filas y con el CTA "Vincular otro padre".
-- [ ] "Editar" abre el modal precargado con "Martina López", `15/04/2022`, Soles, "MANÍ, LACTOSA" y "Lleva inhalador.".
-- [ ] Cambiar el nombre a "Martina López Ruiz", la sala a Lunas y las alergias a "Gluten", y guardar, actualiza el perfil y mueve la tarjeta a `SALA LUNAS` (Lunas `1 niño`, Soles `0 niños`) sin recargar a mano.
-- [ ] Forzar el `<select>` a un UUID inexistente y guardar mantiene el modal abierto, muestra un elemento `role="alert"` con `No pudimos guardar los cambios. Intentá de nuevo.` y no inserta filas.
-- [ ] Mientras la action está pendiente, el botón Guardar muestra `Guardando…` y queda deshabilitado (verificado con latencia artificial).
-- [ ] "Cancelar" no escribe en la base y, al reabrir el modal en modo alta, los campos están vacíos y SALA vuelve a Soles.
-- [ ] La búsqueda sigue funcionando: escribir el nombre deja solo su tarjeta y oculta las salas sin coincidencias; borrar el texto restaura las tres secciones.
-- [ ] `GET /ninos/no-existe` responde `404`; `GET /ninos/agregar` responde `404`; un UUID válido inexistente renderiza la UI de 404 de la app (soft 404 con status `200`, documentado).
-- [ ] `proxy.ts` no importa `app/_data/children` y `grep -r "_data/children" app/ proxy.ts` no devuelve coincidencias.
-- [ ] El composer de publicaciones sigue abriendo y "Toda la sala" sigue expandiendo los mismos 8 chips de audiencia.
-- [ ] `CurrentUser` incluye `daycareId` y la sidebar mantiene nombre, inicial y rol sin cambios visuales.
-- [ ] A 390px las tres secciones, el estado vacío, el modal y el perfil se ven completos y `documentElement.scrollWidth` no supera `innerWidth`.
-- [ ] Las capturas `.playwright-mcp/ninos-empty-1440.png`, `.playwright-mcp/ninos-created-1440.png`, `.playwright-mcp/child-profile-real-1440.png` y `.playwright-mcp/ninos-empty-390.png` muestran la misma jerarquía, colores, tipografía y medidas de tarjeta que la referencia, con las tres salas y el estado vacío nuevos.
-- [ ] Ningún identificador nuevo está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
-- [ ] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`; `package.json` y `package-lock.json` no cambian; no se agregan configs de ruta.
-- [ ] Al cerrar la verificación, `public.children` vuelve a `0` filas y `public.rooms` sigue en `3`.
+- [x] `list_migrations` incluye `create_child_status_enum`, `create_rooms`, `seed_rooms_demo`, `create_children` y `open_children_and_rooms_access`, y los cinco archivos de `supabase/migrations/` tienen el mismo `version`.
+- [x] `list_tables({ schemas: ["public"], verbose: true })` muestra `rooms` con 6 columnas y `children` con 12 columnas, ambas con PK en `id` y `rls_enabled: true`.
+- [x] `enum_range(null::public.child_status)` devuelve exactamente `{active,archived}`.
+- [x] `select count(*) from public.rooms` devuelve `3`.
+- [x] Las tres salas son `Soles`, `Lunas` y `Estrellas`, con `slug` `soles`/`lunas`/`estrellas`, `position` `1`/`2`/`3` y el mismo `daycare_id` que `sala-soles`.
+- [x] `select count(*) from public.children` devuelve `0` al terminar las migraciones.
+- [x] Re-ejecutar el `insert` del seed de salas dentro de una transacción con `rollback` deja el conteo en `3`.
+- [x] `pg_constraint` contiene `rooms_daycare_slug_key`, `rooms_id_daycare_key`, `children_room_fkey` (compuesta `(room_id, daycare_id) → rooms(id, daycare_id)`), `children_full_name_length` y `children_allergy_tags_format`.
+- [x] Existe el trigger `children_set_updated_at` apuntando a `public.set_updated_at()`.
+- [x] Existen las policies `rooms_select_staff`, `children_select_staff`, `children_insert_staff` y `children_update_staff`; no existe ninguna policy de `DELETE` en `rooms` ni en `children`.
+- [x] `information_schema.role_table_grants` no devuelve filas de `anon` para `rooms` ni `children`; `authenticated` tiene `SELECT` en `rooms` y `SELECT, INSERT, UPDATE` en `children`, sin `DELETE`.
+- [x] `has_type_privilege('authenticated', 'public.child_status', 'usage')` es `true` y para `anon` es `false`.
+- [x] `utils/supabase/database.types.ts` incluye `rooms`, `children` y el enum `child_status`.
+- [x] `npm run build` termina sin errores.
+- [x] `npx tsc --noEmit` termina sin errores.
+- [x] `npx eslint app` termina sin errores.
+- [x] La consola del navegador no muestra errores ni warnings de React en `/ninos`, en un perfil ni con el modal abierto y cerrado.
+- [x] Con sesión de staff/admin, `/ninos` muestra tres secciones en orden `SALA SOLES`, `SALA LUNAS`, `SALA ESTRELLAS`, cada una con `0 niños` y el texto `Todavía no hay niños en esta sala.`
+- [x] El `<select>` SALA del modal tiene exactamente tres opciones (`Soles`, `Lunas`, `Estrellas`) cuyos `value` son UUID reales de `public.rooms`, y la opción inicial es Soles.
+- [x] Crear "Martina López", 15/04/2022, sala Soles, alergias "Maní, Lactosa" y notas "Lleva inhalador." desde `/ninos` cierra el modal, deja la tarjeta en `SALA SOLES`, cambia el contador a `1 niño` y muestra el badge `MANÍ` y la meta `{edad calculada} · sin padres vinculados`.
+- [x] Tras ese alta, `select * from public.children` devuelve una fila con `full_name = 'Martina López'`, `birth_date = '2022-04-15'`, `room_id` de Soles, `allergy_tags = {peanut,lactose}`, `medical_notes = 'Lleva inhalador.'`, `enrolled_at = current_date`, `photo_consent = true`, `status = 'active'` y `daycare_id` de `sala-soles`.
+- [x] Hacer clic en la tarjeta navega a `/ninos/{uuid}` y el perfil muestra "Martina López", la edad calculada, "Sala Soles", `15 abr 2022`, `Soles`, el mes y año de ingreso, y el panel "Alergias y notas" con `MANÍ, LACTOSA · Lleva inhalador.`.
+- [x] El perfil de ese niño mantiene "PADRES VINCULADOS" sin filas y con el CTA "Vincular otro padre".
+- [x] "Editar" abre el modal precargado con "Martina López", `15/04/2022`, Soles, "MANÍ, LACTOSA" y "Lleva inhalador.".
+- [x] Cambiar el nombre a "Martina López Ruiz", la sala a Lunas y las alergias a "Gluten", y guardar, actualiza el perfil y mueve la tarjeta a `SALA LUNAS` (Lunas `1 niño`, Soles `0 niños`) sin recargar a mano.
+- [x] Forzar el `<select>` a un UUID inexistente y guardar mantiene el modal abierto, muestra un elemento `role="alert"` con `No pudimos guardar los cambios. Intentá de nuevo.` y no inserta filas.
+- [x] Mientras la action está pendiente, el botón Guardar muestra `Guardando…` y queda deshabilitado (verificado con latencia artificial).
+- [x] "Cancelar" no escribe en la base y, al reabrir el modal en modo alta, los campos están vacíos y SALA vuelve a Soles.
+- [x] La búsqueda sigue funcionando: escribir el nombre deja solo su tarjeta y oculta las salas sin coincidencias; borrar el texto restaura las tres secciones.
+- [x] `GET /ninos/no-existe` responde `404`; `GET /ninos/agregar` responde `404`; un UUID válido inexistente renderiza la UI de 404 de la app (soft 404 con status `200`, documentado).
+- [x] `proxy.ts` no importa `app/_data/children` y `grep -r "_data/children" app/ proxy.ts` no devuelve coincidencias.
+- [x] El composer de publicaciones sigue abriendo y "Toda la sala" sigue expandiendo los mismos 8 chips de audiencia.
+- [x] `CurrentUser` incluye `daycareId` y la sidebar mantiene nombre, inicial y rol sin cambios visuales.
+- [x] A 390px las tres secciones, el estado vacío, el modal y el perfil se ven completos y `documentElement.scrollWidth` no supera `innerWidth`.
+- [x] Las capturas `.playwright-mcp/ninos-empty-1440.png`, `.playwright-mcp/ninos-created-1440.png`, `.playwright-mcp/child-profile-real-1440.png` y `.playwright-mcp/ninos-empty-390.png` muestran la misma jerarquía, colores, tipografía y medidas de tarjeta que la referencia, con las tres salas y el estado vacío nuevos.
+- [x] Ningún identificador nuevo está en español: ni archivos, ni componentes, ni tipos, ni campos, ni variables, ni funciones.
+- [x] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`; `package.json` y `package-lock.json` no cambian; no se agregan configs de ruta.
+- [x] Al cerrar la verificación, `public.children` vuelve a `0` filas y `public.rooms` sigue en `3`.
 
 ## Decisions
 
@@ -548,3 +548,97 @@ Específicas de esta spec:
 - Tests automatizados, modo oscuro e i18n.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+**Fecha:** 2026-10-27 · **Branch:** `spec-10-mantenimiento-de-ninos` · **Commit verificado:** `464d770 "mantenimiento ninos"` · **Agente:** `spec-verifier`
+
+Punto de partida: `git status --short` vacío, todo el trabajo commiteado en `464d770`. Los 38 criterios pasaron sin correcciones de código: el único cambio de esta corrida es este spec (casillas y reporte). No se hizo commit ni stash.
+
+### Comandos ejecutados
+
+| Comando | Resultado | Evidencia |
+| --- | --- | --- |
+| `npm run build` (dev detenido, PID 4924) | exit 0 | `.playwright-mcp/build-10.log`: `✓ Compiled successfully`, 8/8 páginas, rutas `/`, `/ninos` y `/ninos/[id]` (PPR), `ƒ Proxy (Middleware)`. |
+| `npx tsc --noEmit` | exit 0, sin diagnósticos | `.playwright-mcp/tsc-10.log`. |
+| `npx eslint app` | exit 0, sin diagnósticos | `.playwright-mcp/eslint-10.log`. |
+| `list_migrations` / `list_tables` / `execute_sql` | catálogo y datos correctos | ver tabla de criterios. |
+| `curl`/`Invoke-WebRequest` sin cookies | 404 en `/ninos/no-existe` y `/ninos/agregar` | ver criterio 30. |
+| Playwright MCP (dev `:3000`) | flujos completos | ver criterios 17–35. |
+
+### Contraste con la documentación
+
+- **Context7 `/vercel/next.js`**:
+  - *Mutating data*: `revalidatePath` se llama dentro de una Server Function después de mutar; es exactamente lo que hacen `createChild`/`updateChild` en `app/(app)/ninos/actions.ts`.
+  - *Migrating to Cache Components*: `cookies()` y los datos de request deben ir dentro de un `<Suspense>`; es el patrón de `/ninos`, `/ninos/[id]` y del feed.
+- **Docs vendorizadas 16.4.3**:
+  - `node_modules/next/dist/docs/01-app/01-getting-started/07-mutating-data.md:425`: “After performing a mutation… call `revalidatePath` or `revalidateTag` within the Server Function”.
+  - `node_modules/next/dist/docs/01-app/01-getting-started/06-fetching-data.md:315`: el contenido que espera datos se envuelve en `<Suspense>` y la shell se prerenderiza.
+  - `node_modules/next/dist/docs/01-app/02-guides/authentication-with-cache-components.md`: la lectura de sesión (`getCurrentUser`) va detrás de un boundary; se cumple en el layout y en las páginas.
+- **Convenciones del repo verificadas:** sin `dynamic`/`revalidate`/`fetchCache`/`runtime`/`dynamicParams`; Server Components por defecto con `"use client"` solo donde hay estado/eventos; sin `postcss.config.*` ni `tailwind.config.*`; sin cambios en `package.json`/`package-lock.json`.
+
+### Criterios (38/38 PASS)
+
+| # | Criterio | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `list_migrations` incluye las 5 migraciones y los archivos coinciden | PASS | `20261027054445 create_child_status_enum`, `20261027054446 create_rooms`, `20261027054500 seed_rooms_demo`, `20261027054507 create_children`, `20261027054516 open_children_and_rooms_access`; los 5 archivos de `supabase/migrations/` tienen esas versiones. |
+| 2 | `rooms` 6 columnas y `children` 12, PK `id`, RLS | PASS | `information_schema.columns`: `children=12`, `rooms=6`; `children_pkey` y `rooms_pkey`; `relrowsecurity=true` en ambas. |
+| 3 | `enum_range(child_status)` = `{active,archived}` | PASS | `[{"labels":"{active,archived}"}]`. |
+| 4 | `count(*) rooms` = 3 | PASS | `[{"rooms":3,"children":0}]`. |
+| 5 | Soles/Lunas/Estrellas con slug, posición y daycare | PASS | `Soles/soles/1`, `Lunas/lunas/2`, `Estrellas/estrellas/3`, las tres con `daycare=sala-soles`. |
+| 6 | `count(*) children` = 0 al terminar las migraciones | PASS | `children=0` inmediatamente después de aplicar y otra vez al cerrar la verificación. |
+| 7 | Re-ejecutar el seed en tx con rollback deja 3 | PASS | `rooms_after_reseed=3` dentro de `begin…rollback`. |
+| 8 | Constraints pedidas | PASS | `rooms_daycare_slug_key` UNIQUE(daycare_id,slug); `rooms_id_daycare_key` UNIQUE(id,daycare_id); `children_room_fkey` FK(room_id,daycare_id)→rooms(id,daycare_id); `children_full_name_length`; `children_allergy_tags_format`. |
+| 9 | Trigger `children_set_updated_at` | PASS | `pg_trigger` → `proname=set_updated_at`. |
+| 10 | 4 policies, sin `DELETE` | PASS | `rooms_select_staff` (r), `children_select_staff` (r), `children_insert_staff` (a), `children_update_staff` (w); ninguna `d`. |
+| 11 | Grants de `anon`/`authenticated` | PASS | `authenticated`: `rooms=SELECT`, `children=INSERT,SELECT,UPDATE`; `anon` sin filas; sin `DELETE`. |
+| 12 | `has_type_privilege(child_status)` | PASS | `anon=false`, `authenticated=true`. |
+| 13 | Tipos generados con rooms/children/child_status | PASS | `utils/supabase/database.types.ts`: `children` (línea 17), `rooms` (125), `child_status` (215). |
+| 14 | `npm run build` | PASS | exit 0; ver comandos. |
+| 15 | `npx tsc --noEmit` | PASS | exit 0. |
+| 16 | `npx eslint app` | PASS | exit 0. |
+| 17 | Consola sin errores ni warnings de React | PASS | `/ninos`: 0 errores/0 warnings; perfil: 0/0; modal abrir/cerrar: 0/0. |
+| 18 | Tres secciones, orden, `0 niños` y vacío | PASS | `[SALA SOLES/0 niños/vacío, SALA LUNAS/0 niños/vacío, SALA ESTRELLAS/0 niños/vacío]`. |
+| 19 | Select con 3 UUIDs reales y Soles inicial | PASS | Opciones: Soles `c28b1f5c-4e5d-4c88-ae2c-03bbc588a6c1` (selected), Lunas `9dc226e7-…`, Estrellas `b52bb3cc-…`. |
+| 20 | Alta de Martina: tarjeta, contador, badge y meta | PASS | `SALA SOLES / 1 niño / Martina López / 4 años · sin padres vinculados / MANÍ`; modal cerrado y URL `/ninos`. |
+| 21 | Fila de `children` con todos los campos | PASS | `full_name=Martina López`, `birth_date=2022-04-15`, sala Soles, `allergy_tags={peanut,lactose}`, `medical_notes=Lleva inhalador.`, `enrolled_at=2026-10-27`, `photo_consent=true`, `status=active`, daycare `sala-soles`. |
+| 22 | Clic en tarjeta → perfil con datos y panel | PASS | URL `/ninos/ce177ffe-…`; h1 "Martina López"; "4 años · Sala Soles"; "15 abr 2022"; "Soles"; "oct 2026"; "MANÍ, LACTOSA · Lleva inhalador.". |
+| 23 | Padres vacíos y CTA | PASS | "PADRES VINCULADOS" sin filas + "Vincular otro padre". |
+| 24 | Editar precargado | PASS | Título "Editar niño"; `Martina López`; `15/04/2022`; `Soles`; `MANÍ, LACTOSA`; `Lleva inhalador.`. |
+| 25 | Edición mueve tarjeta a Lunas | PASS | Perfil: "Martina López Ruiz", "Sala Lunas", "GLUTEN · Lleva inhalador."; listado: Soles `0 niños`, Lunas `1 niño` con la tarjeta, Estrellas `0 niños`, sin recarga manual. |
+| 26 | UUID de sala inexistente → error inline sin insertar | PASS | `role=alert` = "No pudimos guardar los cambios. Intentá de nuevo."; modal abierto; nombre conservado; `children` sigue en 1 (no insertó). |
+| 27 | Pending `Guardando…` + disabled | PASS | Con 1.5 s de latencia: texto `Guardando…`, `disabled=true`, `aria-busy=true`; luego el modal se cierra. |
+| 28 | Cancelar no escribe y resetea | PASS | Alta inicial vacía/Soles; tras tipear y cancelar, reapertura vacía, Soles y sin alertas; `children` sigue en 1. |
+| 29 | Búsqueda | PASS | "martina" → 1 sección (SALA LUNAS) con su tarjeta; "zzz" → mensaje "No encontramos ningún niño con ese nombre."; limpiar → 3 secciones. |
+| 30 | 404 reales y soft 404 | PASS | `/ninos/no-existe` → 404; `/ninos/agregar` → 404; UUID válido inexistente → status 200 con la UI 404 (documentado en Decisions). |
+| 31 | `proxy.ts` sin `_data/children` | PASS | `Select-String` sobre `app/` y `proxy.ts`: 0 coincidencias. |
+| 32 | Composer con 8 chips | PASS | `input[name="audience"]` = 9 (8 niños + "Toda la sala"); Mateo…Olivia presentes. |
+| 33 | `CurrentUser.daycareId` y sidebar | PASS | `daycareId` en el tipo y `select("… daycare_id")`; sidebar: inicial `K`, "Kevin Calderon", "Administración" (el nombre cambió por pedido explícito del usuario; estructura y rol intactos). |
+| 34 | 390px completo | PASS | Lista: `scrollWidth=390=innerWidth`, 3 secciones; modal: top/left 16, ancho 358, fila fecha/sala en `column`, sin scroll horizontal; perfil: `flexDirection=column`, columna derecha debajo, `scrollWidth=390`. |
+| 35 | Capturas y comparación visual | PASS | `ninos-empty-1440.png`, `ninos-created-1440.png`, `child-profile-real-1440.png`, `ninos-empty-390.png`. Contra `ninos2.png` y `mock-ninos-1440.png`: misma jerarquía, tarjeta (radio 18, padding 16, avatar 48, badge MANÍ), tipografía y paleta. Contra `mock-perfil-1440.png`: mismo layout de perfil (avatar 84, panel, tabla, columna 300). Las tres salas y el estado vacío son nuevos: no hay referencia para ese estado. |
+| 36 | Identificadores en inglés | PASS | Auditoría de `children.ts`, `children-queries.ts`, `feed-audience.ts`, `actions.ts`, páginas y componentes: `ageLabel`, `formatLongDate`, `toneForId`, `toAllergyTags`, `getChildTag`, `groupChildrenByRoom`, `createChild`, `updateChild`, `readChildInput`, etc. El español queda solo en copy y clases de token. |
+| 37 | Sin `any`/`@ts-ignore`/`style`/hex; sin package.json ni configs | PASS | `Select-String` en `app/**/*.{ts,tsx}`: 0 coincidencias; 0 hex en `.ts/.tsx`; 0 configs de ruta; `git diff --name-only main...HEAD -- package.json package-lock.json` vacío. |
+| 38 | Cierre con `children=0` y `rooms=3` | PASS | Tras borrar el niño de prueba: `[{"rooms":3,"children":0}]`. |
+
+### Artefactos (`.playwright-mcp/`, gitignored)
+
+- `build-10.log`, `tsc-10.log`, `eslint-10.log`.
+- `ninos-empty-1440.png` — `/ninos` vacío, 3 salas, sesión de Kevin.
+- `ninos-created-1440.png` — Martina en SALA SOLES.
+- `child-profile-real-1440.png` — perfil real con alergias y padres vacíos.
+- `ninos-empty-390.png` — estado vacío a 390px.
+
+### Archivos modificados en esta corrida
+
+- `specs/database/10-mantenimiento-de-ninos.md`: 38 casillas marcadas + este reporte.
+- Ningún archivo de `app/`, `supabase/`, `proxy.ts`, `utils/` ni configuración. El working tree solo muestra este spec.
+
+### Observaciones y riesgos
+
+- **Cambios fuera del Scope original, ya commiteados en `464d770`:** el usuario demo pasó de `Caro Rojas / caro@opendaycare.com` a `Kevin Calderon / kevin07cv2008@gmail.com` (migración `20261027055841_rename_demo_user`, misma contraseña y UUID) y el saludo/avatar del feed ahora salen de `getCurrentUser` (`Buenas, Kevin`) en lugar del mock. Se hicieron a pedido explícito durante la implementación; no afectan ningún criterio y quedan documentados acá porque la spec no los incluye.
+- **`children` se usó para verificar y se limpió:** se creó Martina, se editó y se borró con `execute_sql`; el estado final verificado es `children=0`. Es la acción de verificación prevista en Risks.
+- **Soft 404:** un UUID válido inexistente responde 200 con la UI de 404, porque el proxy no consulta la base (decisión de SPEC 09). `/ninos/no-existe` y `/ninos/agregar` sí responden 404 reales por validación de formato.
+- **Sin referencia para el estado nuevo:** `references/screenshots/ninos.png` es un recorte del sidebar; la comparación de la lista se hizo contra `ninos2.png` y el render `mock-ninos-1440.png`. No se declara paridad pixel a pixel para las tres salas ni para el estado vacío.
+- **Warning dev transitorio observado:** en una corrida previa apareció una vez el aviso de Next "Route /ninos/[id] is rendering with server caches disabled"; no volvió a aparecer en la pasada final (0 errores/0 warnings en `/ninos`, perfil y modal) y no es un warning de React.
+- **`rooms` con FK `on delete restrict`:** borrar una sala con niños falla por diseño; no hay UI de baja de salas en esta spec.
+- **Estado del spec:** sigue en `Aprovado`. Con 38/38 PASS corresponde pasarlo a `Implementado` y commitear; ambas cosas las decide el usuario.
