@@ -37,6 +37,19 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - `LayoutProps<"/">` / `PageProps` are generated into `.next/types`. If they are missing after adding a route, run `npm run dev` or `npm run build` once.
 - `experimental.agentFeedback` is on, so `next dev` may manage additional blocks in this file. Edit around the managed `nextjs-*` blocks; do not delete them.
 
+## Supabase (app ↔ database)
+
+- The app talks to Supabase only through Supabase's own Next.js packages: `@supabase/supabase-js` + `@supabase/ssr`. Do not add a second Postgres client (`pg`, `postgres`, ...) or hand-rolled `fetch` calls to the REST/Auth endpoints.
+- The three factories in `utils/supabase/` are the only places that call `createServerClient` / `createBrowserClient`:
+  - `server.ts` → `createClient(cookieStore)` for Server Components, Server Actions and Route Handlers. Call it with `await cookies()`; it is not async. Reads are request-time data, so they belong inside `<Suspense>` when `cacheComponents` is in play.
+  - `client.ts` → `createClient()` for Client Components. Browser-only: never import it from server code.
+  - `middleware.ts` → `updateSession(request)`, imported by the root `proxy.ts`. Next.js 16 renamed Middleware to Proxy: the refresh lives in `proxy.ts`, so do not add a root `middleware.ts` and do not move that helper out of `utils/supabase/`.
+- Sessions are refreshed in `proxy.ts` on every page/action request, because Server Components cannot write cookies. Any early return from the proxy (e.g. the unknown-child 404) has to copy the refreshed cookies onto its own response.
+- Env vars: `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` in `.env.local` (gitignored, placeholders in `.env.template`). Never hardcode values, never commit `.env*`, and never expose the service role key to the app.
+- Never share a client across requests or keep a module-level singleton on the server: `@supabase/ssr` binds the cookie adapter to one request.
+- Table access is governed by RLS and grants (`specs/database/`, `supabase/README.md`). `public` tables stay closed to `anon`/`authenticated` until a policy justifies opening them, so `permission denied` from a query is the expected state until that spec lands. DDL, seeds and policies still go through the Supabase MCP migration flow — never through these packages.
+- When generated database types are adopted, pass them as the generic to the factories in those three files instead of duplicating row types.
+
 ## Tooling
 
 - Playwright MCP is configured in `opencode.json`. Put every screenshot, trace, and artifact under `.playwright-mcp/` (gitignored). Use it to compare the running app against `references/screenshots/`.
