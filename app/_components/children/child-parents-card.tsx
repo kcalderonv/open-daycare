@@ -6,11 +6,12 @@ import type {
   Parent,
   ParentRelationship,
   ParentStatus,
-} from "@/app/_data/children";
+} from "@/app/_lib/children";
 
 const PARENT_AVATAR_STYLES: Record<ParentRelationship, string> = {
   mother: "bg-parent-lilac-bg",
   father: "bg-parent-blue-bg",
+  guardian: "bg-parent-blue-bg",
 };
 
 type ParentStatusCopy = {
@@ -43,6 +44,18 @@ const PARENT_STATUS_COPY: Record<
     },
     pending: {
       meta: "Papá · invitación enviada",
+      badge: "PENDIENTE",
+      badgeClassName: "bg-badge-pending-bg text-badge-pending",
+    },
+  },
+  guardian: {
+    active: {
+      meta: "Tutor/a · activo",
+      badge: "ACTIVO",
+      badgeClassName: "bg-badge-achievement-bg text-badge-achievement",
+    },
+    pending: {
+      meta: "Tutor/a · invitación enviada",
       badge: "PENDIENTE",
       badgeClassName: "bg-badge-pending-bg text-badge-pending",
     },

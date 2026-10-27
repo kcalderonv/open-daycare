@@ -1,19 +1,26 @@
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
 import { ChildForm } from "@/app/_components/children/child-form";
 import { FormDialog } from "@/app/_components/ui/form-dialog";
-import { room, type Child } from "@/app/_data/children";
+import type { Child, Room } from "@/app/_lib/children";
 
-export function ChildProfileHeader({ child }: { child: Child }) {
+type ChildProfileHeaderProps = {
+  child: Child;
+  rooms: Room[];
+};
+
+export function ChildProfileHeader({ child, rooms }: ChildProfileHeaderProps) {
+  const roomLabel = child.roomName ? `Sala ${child.roomName}` : "Sin sala";
+
   return (
     <div className="flex items-center gap-[18px]">
       <ChildAvatar initial={child.initial} tone={child.tone} size="lg" />
 
       <div className="flex-1">
         <h1 className="font-display text-[28px] font-semibold text-ink">
-          {child.name}
+          {child.fullName}
         </h1>
         <p className="mt-[3px] text-[15px] text-muted">
-          {child.ageLabel} · {room.name}
+          {child.ageLabel} · {roomLabel}
         </p>
       </div>
 
@@ -23,7 +30,7 @@ export function ChildProfileHeader({ child }: { child: Child }) {
         titleId="child-form-title"
         initialFocusId="child-name"
       >
-        <ChildForm mode="edit" child={child} />
+        <ChildForm mode="edit" child={child} rooms={rooms} />
       </FormDialog>
     </div>
   );

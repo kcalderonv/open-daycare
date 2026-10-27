@@ -13,7 +13,7 @@ import {
   ModalDialog,
   type ModalDialogHandle,
 } from "@/app/_components/ui/modal-dialog";
-import { children } from "@/app/_data/children";
+import { feedAudience } from "@/app/_data/feed-audience";
 import { audienceChipId } from "@/app/_data/post-composer";
 
 const PostComposerContext = createContext<(() => void) | null>(null);
@@ -51,7 +51,7 @@ export function PostComposerProvider({
       <ModalDialog
         ref={dialogRef}
         titleId="post-form-title"
-        initialFocusId={audienceChipId(children[0].id)}
+        initialFocusId={audienceChipId(feedAudience[0].id)}
         onClose={() => setSession((current) => current + 1)}
       >
         <PostForm key={session} onClose={closeComposer} />

@@ -20,16 +20,9 @@ export type Post = {
   comments: number;
 };
 
-export const currentUser = {
-  name: "Caro Giménez",
-  initial: "C",
-  role: "Maestra · Soles",
-} as const;
-
 export const currentRoom = {
   name: "Sala Soles",
   eyebrow: "GUARDERÍA · SALA SOLES",
-  greeting: "Buenas, Caro",
   summary: "12 niños · martes 17 jun",
 } as const;
 

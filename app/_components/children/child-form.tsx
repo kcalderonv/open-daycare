@@ -1,6 +1,13 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useState,
+  useTransition,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
+import { createChild, updateChild } from "@/app/(app)/ninos/actions";
 import { useFormDialogClose } from "@/app/_components/ui/form-dialog";
 import {
   FormField,
@@ -8,7 +15,7 @@ import {
   FormTextArea,
   type FormSelectOption,
 } from "@/app/_components/ui/form-field";
-import { room, type Child } from "@/app/_data/children";
+import type { Child, Room } from "@/app/_lib/children";
 
 export type ChildFormMode = "create" | "edit";
 
@@ -16,10 +23,6 @@ const FORM_TITLE: Record<ChildFormMode, string> = {
   create: "Agregar niño",
   edit: "Editar niño",
 };
-
-const ROOM_OPTIONS: FormSelectOption[] = [
-  { value: "soles", label: room.shortName },
-];
 
 const BUTTON_CLASS =
   "cursor-pointer rounded-md focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 focus-visible:ring-offset-auth-bg";
@@ -124,25 +127,39 @@ type ChildFormDefaults = {
 
 function childFormDefaults(child?: Child): ChildFormDefaults {
   return {
-    name: child?.name ?? "",
+    name: child?.fullName ?? "",
     birthDate: child?.birthDateInput ?? "",
     allergies: child?.allergies.map((allergy) => allergy.label).join(", ") ?? "",
-    notes: child?.allergies[0]?.note ?? "",
+    notes: child?.medicalNotes ?? "",
   };
 }
 
 type ChildFormProps = {
   mode: ChildFormMode;
   child?: Child;
+  rooms: Room[];
 };
 
-export function ChildForm({ mode, child }: ChildFormProps) {
+export function ChildForm({ mode, child, rooms }: ChildFormProps) {
   const defaults = childFormDefaults(child);
+  const roomOptions: FormSelectOption[] = rooms.map(({ id, name }) => ({
+    value: id,
+    label: name,
+  }));
+  const defaultRoomId = child?.roomId ?? rooms[0]?.id ?? "";
+  const isEdit = mode === "edit" && child !== undefined;
   const closeDialog = useFormDialogClose();
+  const router = useRouter();
   const [errors, setErrors] = useState<ChildErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (pending) {
+      return;
+    }
 
     const data = new FormData(event.currentTarget);
     const nextErrors: ChildErrors = {};
@@ -166,7 +183,20 @@ export function ChildForm({ mode, child }: ChildFormProps) {
       return;
     }
 
-    closeDialog();
+    startTransition(async () => {
+      const result = isEdit
+        ? await updateChild(child.id, data)
+        : await createChild(data);
+
+      if (!result.ok) {
+        setSubmitError(result.error);
+        return;
+      }
+
+      setSubmitError(null);
+      closeDialog();
+      router.refresh();
+    });
   }
 
   function handleChange(event: ChangeEvent<HTMLFormElement>) {
@@ -191,13 +221,18 @@ export function ChildForm({ mode, child }: ChildFormProps) {
     }));
   }
 
+  function handleReset() {
+    setErrors({});
+    setSubmitError(null);
+  }
+
   return (
     <form
       noValidate
       autoComplete="off"
       onSubmit={handleSubmit}
       onChange={handleChange}
-      onReset={() => setErrors({})}
+      onReset={handleReset}
       className="max-h-[calc(100dvh-32px)] w-full max-w-[520px] overflow-y-auto rounded-3xl border border-border bg-auth-bg shadow-dialog"
     >
       <header className="flex items-center justify-between gap-3 border-b border-border px-[26px] py-5">
@@ -216,13 +251,24 @@ export function ChildForm({ mode, child }: ChildFormProps) {
         </h2>
         <button
           type="submit"
-          className={`${BUTTON_CLASS} text-[15px] font-extrabold text-eyebrow`}
+          disabled={pending}
+          aria-busy={pending}
+          className={`${BUTTON_CLASS} text-[15px] font-extrabold text-eyebrow disabled:cursor-not-allowed disabled:opacity-60`}
         >
-          Guardar
+          {pending ? "Guardando…" : "Guardar"}
         </button>
       </header>
 
       <div className="px-[26px] py-6">
+        {submitError ? (
+          <p
+            role="alert"
+            className="mb-[18px] rounded-[12px] bg-allergy-panel px-4 py-3 text-[13.5px] font-bold text-allergy-title"
+          >
+            {submitError}
+          </p>
+        ) : null}
+
         <div className="mb-[18px]">
           <FormField
             id="child-name"
@@ -252,8 +298,9 @@ export function ChildForm({ mode, child }: ChildFormProps) {
               id="child-room"
               label="SALA"
               name="room"
-              options={ROOM_OPTIONS}
-              defaultValue="soles"
+              options={roomOptions}
+              defaultValue={defaultRoomId}
+              required
             />
           </div>
         </div>

@@ -4,7 +4,7 @@ import { useState, type ChangeEvent, type FormEvent } from "react";
 import { CloseIcon, InfoIcon, SendIcon } from "@/app/_components/icons";
 import { useFormDialogClose } from "@/app/_components/ui/form-dialog";
 import { FormField } from "@/app/_components/ui/form-field";
-import type { Child } from "@/app/_data/children";
+import type { Child } from "@/app/_lib/children";
 import {
   defaultRelationship,
   parentInvite,
@@ -129,7 +129,7 @@ export function ParentInviteForm({ child }: { child: Child }) {
           >
             Vincular padre
           </h2>
-          <p className="text-[13px] text-muted-soft">a {child.name}</p>
+          <p className="text-[13px] text-muted-soft">a {child.fullName}</p>
         </div>
         <button
           type="button"

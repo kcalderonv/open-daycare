@@ -2,7 +2,11 @@ import Link from "next/link";
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
 import { ChildTagBadge } from "@/app/_components/children/child-tag";
 import { ChevronRightIcon } from "@/app/_components/icons";
-import { getChildTag, parentsSummary, type Child } from "@/app/_data/children";
+import {
+  getChildTag,
+  parentsSummary,
+  type Child,
+} from "@/app/_lib/children";
 
 export function ChildCard({ child }: { child: Child }) {
   const tag = getChildTag(child);
@@ -16,7 +20,7 @@ export function ChildCard({ child }: { child: Child }) {
 
       <div className="min-w-0 flex-1">
         <div className="font-display text-[16px] font-semibold text-ink">
-          {child.name}
+          {child.fullName}
         </div>
         <div className="text-[13px] text-muted-soft">
           {child.ageLabel} · {parentsSummary(child.parents.length)}
