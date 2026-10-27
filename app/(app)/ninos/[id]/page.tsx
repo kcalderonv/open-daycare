@@ -6,11 +6,9 @@ import { ChildInfoTable } from "@/app/_components/children/child-info-table";
 import { ChildParentsCard } from "@/app/_components/children/child-parents-card";
 import { ChildProfileHeader } from "@/app/_components/children/child-profile-header";
 import { ChevronLeftIcon, SunIcon } from "@/app/_components/icons";
-import { children, getChild } from "@/app/_data/children";
-
-export function generateStaticParams() {
-  return children.map(({ id }) => ({ id }));
-}
+import { getCurrentUser } from "@/app/_lib/auth";
+import type { Child, Room } from "@/app/_lib/children";
+import { getChild, getRooms } from "@/app/_lib/children-queries";
 
 export default function ChildProfilePage({ params }: PageProps<"/ninos/[id]">) {
   return (
@@ -32,8 +30,29 @@ export default function ChildProfilePage({ params }: PageProps<"/ninos/[id]">) {
   );
 }
 
-function ChildProfileContent({ id }: { id: string }) {
-  const child = getChild(id);
+async function ChildProfileContent({ id }: { id: string }) {
+  const user = await getCurrentUser();
+  let rooms: Room[] = [];
+  let child: Child | null = null;
+  let failed = false;
+
+  try {
+    rooms = await getRooms(user.daycareId);
+    child = await getChild(user.daycareId, id);
+  } catch {
+    failed = true;
+  }
+
+  if (failed) {
+    return (
+      <p
+        role="alert"
+        className="rounded-[18px] border border-dashed border-error bg-surface px-6 py-10 text-center text-[14.5px] font-bold text-error"
+      >
+        No pudimos cargar el perfil. Recargá la página.
+      </p>
+    );
+  }
 
   if (!child) {
     notFound();
@@ -42,8 +61,8 @@ function ChildProfileContent({ id }: { id: string }) {
   return (
     <div className="flex flex-col gap-[26px] lg:flex-row lg:items-start">
       <div className="flex min-w-0 flex-1 flex-col gap-[18px]">
-        <ChildProfileHeader child={child} />
-        <ChildAllergyNote allergies={child.allergies} />
+        <ChildProfileHeader child={child} rooms={rooms} />
+        <ChildAllergyNote tags={child.allergyTags} note={child.medicalNotes} />
         <ChildInfoTable child={child} />
       </div>
 

@@ -1,4 +1,4 @@
-import type { ChildTone } from "@/app/_data/children";
+import type { ChildTone } from "@/app/_lib/children";
 
 const TONE_STYLES: Record<ChildTone, string> = {
   sky: "bg-child-sky-bg text-child-sky-fg",

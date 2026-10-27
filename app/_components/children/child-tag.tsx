@@ -1,4 +1,4 @@
-import type { ChildTag } from "@/app/_data/children";
+import type { ChildTag } from "@/app/_lib/children";
 
 const TAG_STYLES: Record<ChildTag["kind"], string> = {
   allergy: "bg-tag-allergy-bg text-tag-allergy-fg",

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { ChildCard } from "@/app/_components/children/child-card";
 import { SearchIcon } from "@/app/_components/icons";
-import { room, type Child } from "@/app/_data/children";
+import type { ChildGroup } from "@/app/_lib/children";
 
 function normalize(value: string): string {
   return value
@@ -13,13 +13,25 @@ function normalize(value: string): string {
     .trim();
 }
 
-export function ChildrenSearch({ items }: { items: Child[] }) {
+function countLabel(count: number): string {
+  return `${count} ${count === 1 ? "niño" : "niños"}`;
+}
+
+export function ChildrenSearch({ groups }: { groups: ChildGroup[] }) {
   const [query, setQuery] = useState("");
   const term = normalize(query);
-  const visible =
-    term === ""
-      ? items
-      : items.filter((child) => normalize(child.name).includes(term));
+  const visible = groups
+    .map((group) => ({
+      group,
+      matches:
+        term === ""
+          ? group.children
+          : group.children.filter((child) =>
+              normalize(child.fullName).includes(term),
+            ),
+    }))
+    .filter(({ matches }) => term === "" || matches.length > 0);
+  const hasResults = visible.some(({ matches }) => matches.length > 0);
 
   return (
     <>
@@ -40,22 +52,36 @@ export function ChildrenSearch({ items }: { items: Child[] }) {
         />
       </div>
 
-      <div className="mb-3.5 flex items-center gap-3">
-        <span className="text-[12.5px] font-extrabold uppercase tracking-[.8px] text-ink">
-          {room.name}
-        </span>
-        <span className="text-[13px] text-muted-soft">{items.length} niños</span>
-        <span className="h-px flex-1 bg-separator" />
-      </div>
-
-      {visible.length === 0 ? (
+      {term !== "" && !hasResults ? (
         <p className="rounded-[18px] border border-dashed border-border bg-surface px-6 py-10 text-center text-[14.5px] text-muted">
           No encontramos ningún niño con ese nombre.
         </p>
       ) : (
-        <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
-          {visible.map((child) => (
-            <ChildCard key={child.id} child={child} />
+        <div className="flex flex-col gap-[22px]">
+          {visible.map(({ group, matches }) => (
+            <section key={group.id}>
+              <div className="mb-3.5 flex items-center gap-3">
+                <span className="text-[12.5px] font-extrabold uppercase tracking-[.8px] text-ink">
+                  {group.title}
+                </span>
+                <span className="text-[13px] text-muted-soft">
+                  {countLabel(group.children.length)}
+                </span>
+                <span className="h-px flex-1 bg-separator" />
+              </div>
+
+              {matches.length === 0 ? (
+                <p className="rounded-[18px] border border-dashed border-border bg-surface px-6 py-10 text-center text-[14.5px] text-muted">
+                  Todavía no hay niños en esta sala.
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
+                  {matches.map((child) => (
+                    <ChildCard key={child.id} child={child} />
+                  ))}
+                </div>
+              )}
+            </section>
           ))}
         </div>
       )}

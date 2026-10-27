@@ -10,7 +10,7 @@ import {
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
 import { CloseIcon, PlusIcon } from "@/app/_components/icons";
 import { FormTextArea } from "@/app/_components/ui/form-field";
-import { children } from "@/app/_data/children";
+import { feedAudience } from "@/app/_data/feed-audience";
 import {
   audienceChipId,
   descriptionLimits,
@@ -34,7 +34,7 @@ type SelectedPhoto = { id: string; name: string; url: string };
 const FIELD_ORDER: PostField[] = ["audience", "postType", "description"];
 
 const FOCUS_TARGETS: Record<PostField, string> = {
-  audience: audienceChipId(children[0].id),
+  audience: audienceChipId(feedAudience[0].id),
   postType: `post-type-${postTypes[0].id}`,
   description: "post-description",
 };
@@ -60,7 +60,7 @@ const CHIP_IDLE =
 
 function resolvedAudienceIds(selection: AudienceState): string[] {
   return selection.wholeRoom
-    ? children.map((child) => child.id)
+    ? feedAudience.map((child) => child.id)
     : selection.childIds;
 }
 
@@ -279,7 +279,7 @@ export function PostForm({ onClose }: PostFormProps) {
         >
           <legend className={SECTION_LABEL}>PARA</legend>
           <div className="flex flex-wrap gap-[9px]">
-            {children.map((child) => {
+            {feedAudience.map((child) => {
               const checked =
                 !audience.wholeRoom && audience.childIds.includes(child.id);
 
@@ -298,7 +298,7 @@ export function PostForm({ onClose }: PostFormProps) {
                     className={`${CHIP_BASE} ${CHIP_IDLE} pl-1.5 pr-3.5`}
                   >
                     <ChildAvatar
-                      initial={child.initial}
+                      initial={child.firstName.charAt(0)}
                       tone={child.tone}
                       size="xs"
                     />

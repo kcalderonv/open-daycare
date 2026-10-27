@@ -1,10 +1,10 @@
-import { room, type Child } from "@/app/_data/children";
+import type { Child } from "@/app/_lib/children";
 
 export function ChildInfoTable({ child }: { child: Child }) {
   const rows = [
     { label: "Fecha de nacimiento", value: child.birthDateLabel },
-    { label: "Sala", value: room.shortName },
-    { label: "Ingreso", value: child.joinedAtLabel },
+    { label: "Sala", value: child.roomName ?? "Sin sala" },
+    { label: "Ingreso", value: child.enrolledAtLabel },
   ];
 
   return (

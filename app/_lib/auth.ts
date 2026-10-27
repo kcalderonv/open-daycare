@@ -11,6 +11,7 @@ export type CurrentUser = {
   id: string;
   fullName: string;
   role: UserRole;
+  daycareId: string;
 };
 
 /**
@@ -33,7 +34,7 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser> => {
 
   const { data: profile, error } = await supabase
     .from("users")
-    .select("id, full_name, role")
+    .select("id, full_name, role, daycare_id")
     .eq("id", userId)
     .eq("status", "active")
     .maybeSingle();
@@ -46,5 +47,6 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser> => {
     id: profile.id,
     fullName: profile.full_name,
     role: profile.role,
+    daycareId: profile.daycare_id,
   };
 });

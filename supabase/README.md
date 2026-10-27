@@ -58,7 +58,7 @@ grant usage on type public.user_role to service_role;
 ## Auth
 
 - Las credenciales viven en `auth.users`; `public.users` guarda solo el perfil y comparte el UUID con `auth.users(id)` (`users_auth_fkey`, `on delete cascade`).
-- El usuario demo se siembra por migración con el UUID fijo `d3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d`, email confirmado y contraseña hasheada con `extensions.crypt`. Insertar en `auth.users` y `auth.identities` no es API pública de Supabase: si una actualización de GoTrue cambia el esquema, el login real lo detecta y el plan B es crear el usuario desde el Dashboard y ajustar el perfil.
+- El usuario demo se siembra por migración con el UUID fijo `d3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d`, email confirmado y contraseña hasheada con `extensions.crypt`. El seed original crea `Caro Rojas`; la migración `rename_demo_user` lo deja como `Kevin Calderon` / `kevin07cv2008@gmail.com` conservando el UUID y la contraseña. Insertar en `auth.users` y `auth.identities` no es API pública de Supabase: si una actualización de GoTrue cambia el esquema, el login real lo detecta y el plan B es crear el usuario desde el Dashboard y ajustar el perfil.
 - El rol `authenticated` solo puede leer su propia fila de `public.users`; `anon` sigue sin grants.
 - `USAGE` de los enums se concede a `authenticated` junto con la policy, porque PostgREST lo necesita para serializar `role` y `status`.
 
@@ -77,6 +77,29 @@ grant usage on type public.user_role, public.user_status to authenticated;
 ```
 
 - La app nunca usa `service_role`: el seed y las policies se aplican con el MCP, no desde `app/`.
+
+## Niños y salas
+
+- `public.rooms` guarda las salas de cada daycare (`Soles`, `Lunas`, `Estrellas` en el seed). `position` fija el orden de la UI; `slug` es la clave estable y única por daycare.
+- `public.children` guarda `daycare_id` (obligatorio) y `room_id` (nullable). La FK es compuesta: `(room_id, daycare_id) → rooms(id, daycare_id)`, así un niño no puede quedar en una sala de otra guardería.
+- `enrolled_at` default `current_date`, `photo_consent` default `true` y `status` default `active`: el alta desde la app no los envía.
+- `allergy_tags` es `text[]` en inglés (`peanut`, `lactose`, …); la UI traduce y guarda sinónimos desde el formulario.
+- Acceso: `admin` y `staff` del mismo daycare leen niños y salas, y pueden insertar y actualizar niños. `rooms` es de solo lectura desde la app. Los padres no ven niños hasta que exista `parent_children`.
+- No hay policy ni grant de `DELETE`: la baja lógica (`status = 'archived'`) va en su propia spec.
+- **Cuidado con las policies:** la referencia al daycare debe ir calificada (`children.daycare_id`, `rooms.daycare_id`). Un `daycare_id` sin prefijo dentro del subquery resuelve a `users.daycare_id` y la policy deja de filtrar entre guarderías.
+- Las policies de niños dependen de `users_select_own` (SPEC 09). Si esa policy cambia, hay que revisar `children_select_staff`, `children_insert_staff` y `children_update_staff`.
+
+```sql
+-- Salas de un daycare, en orden de UI
+select name, slug, position
+from public.rooms
+where daycare_id = (select id from public.daycares where slug = 'sala-soles')
+order by position, name;
+
+-- Acceso efectivo del rol del Data API
+select has_table_privilege('authenticated', 'public.children', 'insert') as puede_insertar,
+       has_table_privilege('anon', 'public.children', 'select') as anon_lee;
+```
 
 ## Comprobaciones útiles
 

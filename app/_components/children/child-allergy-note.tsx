@@ -1,8 +1,18 @@
 import { AlertTriangleIcon } from "@/app/_components/icons";
-import type { Child } from "@/app/_data/children";
+import { allergyLabel } from "@/app/_lib/children";
 
-export function ChildAllergyNote({ allergies }: { allergies: Child["allergies"] }) {
-  if (allergies.length === 0) {
+type ChildAllergyNoteProps = {
+  tags: string[];
+  note: string | null;
+};
+
+export function ChildAllergyNote({ tags, note }: ChildAllergyNoteProps) {
+  const labels = tags.map(allergyLabel).join(", ");
+  const body = [labels, note]
+    .filter((part): part is string => Boolean(part && part.trim() !== ""))
+    .join(" · ");
+
+  if (body === "") {
     return null;
   }
 
@@ -16,7 +26,7 @@ export function ChildAllergyNote({ allergies }: { allergies: Child["allergies"] 
           Alergias y notas
         </div>
         <div className="text-[14.5px] leading-[1.5] text-allergy-body">
-          {allergies.map((allergy) => allergy.note).join(" ")}
+          {body}
         </div>
       </div>
     </div>

@@ -1,9 +1,9 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { children } from "@/app/_data/children";
 import { resolveNextPath } from "@/app/_lib/next-path";
 import { updateSession } from "@/utils/supabase/middleware";
 
-const CHILD_IDS = new Set(children.map(({ id }) => id));
+const CHILD_ID_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const PUBLIC_PATHS = new Set(["/login", "/activar-cuenta"]);
 
@@ -29,12 +29,14 @@ export async function proxy(request: NextRequest) {
 
   const { pathname, search } = request.nextUrl;
 
-  // Unknown child slugs must answer 404 before the PPR shell is streamed,
-  // otherwise the not-found UI would arrive after a 200 response.
+  // Invalid child ids must answer 404 before the PPR shell is streamed,
+  // otherwise the not-found UI would arrive after a 200 response. A valid UUID
+  // that does not exist is resolved by the page as a soft 404: the proxy never
+  // queries the database.
   const isChildDetail = pathname.startsWith("/ninos/");
-  const childId = pathname.split("/")[2];
+  const childId = pathname.split("/")[2] ?? "";
 
-  if (isChildDetail && !CHILD_IDS.has(childId)) {
+  if (isChildDetail && !CHILD_ID_PATTERN.test(childId)) {
     const notFound = new NextResponse(null, { status: 404 });
     response.cookies.getAll().forEach((cookie) => notFound.cookies.set(cookie));
     return notFound;
