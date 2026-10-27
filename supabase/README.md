@@ -29,6 +29,32 @@ Este proyecto administra el esquema de Supabase por MCP. No hay Supabase CLI, Do
 - `service_role` mantiene acceso completo para el backend y el MCP.
 - Las policies por usuario llegan con la spec de autenticación, no antes.
 
+## Enums
+
+- Cada enum vive en `public` y se crea en su propia migración `create_<nombre>_enums`, antes de la tabla que lo usa.
+- `create type` no soporta `if not exists`. Usar una guarda sobre `pg_type` + `pg_namespace` para que la migración se pueda re-aplicar.
+- Cerrar `USAGE` igual que las tablas: `revoke all on type ... from public, anon, authenticated;` y `grant usage on type ... to service_role;`.
+- Los labels van en inglés y en orden estable; la traducción vive en la UI.
+- Para agregar un valor alcanza `alter type ... add value`; quitar o renombrar un label requiere recrear el tipo.
+
+```sql
+do $$
+begin
+  if not exists (
+    select 1
+    from pg_type t
+    join pg_namespace n on n.oid = t.typnamespace
+    where t.typname = 'user_role' and n.nspname = 'public'
+  ) then
+    create type public.user_role as enum ('admin', 'staff', 'parent');
+  end if;
+end
+$$;
+
+revoke all on type public.user_role from public, anon, authenticated;
+grant usage on type public.user_role to service_role;
+```
+
 ## Comprobaciones útiles
 
 ```sql
@@ -46,4 +72,7 @@ select conname, pg_get_constraintdef(oid)
 from pg_constraint
 where conrelid = 'public.daycares'::regclass
 order by conname;
+
+-- Privilegios de un enum
+select has_type_privilege('anon', 'public.user_role', 'usage');
 ```
