@@ -165,23 +165,23 @@ Convenciones:
 
 ## Acceptance criteria
 
-- [ ] `list_tables({ schemas: ["public"], verbose: true })` incluye `users` con 10 columnas y PK en `id`.
-- [ ] `users` tiene la FK `users_daycare_fkey` hacia `public.daycares(id)` con `on delete restrict`.
-- [ ] `enum_range(null::public.user_role)` devuelve exactamente `{admin,staff,parent}` y `enum_range(null::public.user_status)` devuelve `{pending,active}`.
-- [ ] `pg_type` + `pg_namespace` confirman que ambos tipos están en el esquema `public`.
-- [ ] `select count(*) from public.users` devuelve `1`.
-- [ ] La fila del seed tiene `id = 'd3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d'`, `full_name = 'Caro Rojas'`, `role = 'admin'`, `status = 'active'` y `daycare_id` igual al `id` de `sala-soles`.
-- [ ] Re-ejecutar el `insert` del seed dentro de una transacción con `rollback` deja el conteo en `1`.
-- [ ] `pg_class.relrowsecurity` es `true` para `public.users`.
-- [ ] `information_schema.role_table_grants` no devuelve filas de `anon` ni `authenticated` para `users`.
-- [ ] `has_type_privilege('anon', 'public.user_role', 'usage')` y `has_type_privilege('authenticated', 'public.user_role', 'usage')` devuelven `false`; para `service_role` devuelven `true`.
-- [ ] Existe el trigger `users_set_updated_at` apuntando a `public.set_updated_at()`.
-- [ ] Un `update` sobre el usuario demo cambia `updated_at` a un valor mayor que `created_at`.
-- [ ] Intentar borrar el daycare `sala-soles` dentro de una transacción con `rollback` falla por la FK.
-- [ ] Los tres archivos `supabase/migrations/<version>_*.sql` existen y sus `<version>` coinciden con `list_migrations`.
-- [ ] `supabase/README.md` documenta la sección **Enums** con la guarda y el cierre de `USAGE`.
-- [ ] `npx tsc --noEmit` termina sin errores.
-- [ ] `git diff --name-only` no muestra archivos de `app/`, `package.json`, `package-lock.json`, `next.config.ts` ni `proxy.ts`.
+- [x] `list_tables({ schemas: ["public"], verbose: true })` incluye `users` con 10 columnas y PK en `id`.
+- [x] `users` tiene la FK `users_daycare_fkey` hacia `public.daycares(id)` con `on delete restrict`.
+- [x] `enum_range(null::public.user_role)` devuelve exactamente `{admin,staff,parent}` y `enum_range(null::public.user_status)` devuelve `{pending,active}`.
+- [x] `pg_type` + `pg_namespace` confirman que ambos tipos están en el esquema `public`.
+- [x] `select count(*) from public.users` devuelve `1`.
+- [x] La fila del seed tiene `id = 'd3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d'`, `full_name = 'Caro Rojas'`, `role = 'admin'`, `status = 'active'` y `daycare_id` igual al `id` de `sala-soles`.
+- [x] Re-ejecutar el `insert` del seed dentro de una transacción con `rollback` deja el conteo en `1`.
+- [x] `pg_class.relrowsecurity` es `true` para `public.users`.
+- [x] `information_schema.role_table_grants` no devuelve filas de `anon` ni `authenticated` para `users`.
+- [x] `has_type_privilege('anon', 'public.user_role', 'usage')` y `has_type_privilege('authenticated', 'public.user_role', 'usage')` devuelven `false`; para `service_role` devuelven `true`.
+- [x] Existe el trigger `users_set_updated_at` apuntando a `public.set_updated_at()`.
+- [x] Un `update` sobre el usuario demo cambia `updated_at` a un valor mayor que `created_at`.
+- [x] Intentar borrar el daycare `sala-soles` dentro de una transacción con `rollback` falla por la FK.
+- [x] Los tres archivos `supabase/migrations/<version>_*.sql` existen y sus `<version>` coinciden con `list_migrations`.
+- [x] `supabase/README.md` documenta la sección **Enums** con la guarda y el cierre de `USAGE`.
+- [x] `npx tsc --noEmit` termina sin errores.
+- [x] `git diff --name-only` no muestra archivos de `app/`, `package.json`, `package-lock.json`, `next.config.ts` ni `proxy.ts`.
 
 ## Decisions
 
@@ -224,3 +224,75 @@ Convenciones:
 - Storage, avatares subidos y datos de contacto del seed.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+- **Fecha de corrida:** 2026-10-26 23:05 -05:00 (los `version` de migración están en UTC y por eso figuran `20261027...`)
+- **Branch:** `spec-08-users-table-y-enums` (HEAD `46decc1 08-user-table`)
+- **Punto de partida:** árbol limpio, todo el trabajo de la spec ya commiteado por el usuario. No hizo falta corregir código ni SQL en esta corrida.
+
+### Comandos ejecutados
+
+| Comando | Resultado |
+| --- | --- |
+| `npm run build` | exit 0. `✓ Compiled successfully in 4.6s`, `Finished TypeScript in 6.1s`, 16 páginas generadas, `ƒ Proxy (Middleware)`. |
+| `npx tsc --noEmit` | exit 0, sin salida de errores. |
+| `npx eslint app` | exit 0, sin errores ni warnings. |
+| `git diff --name-only` (working tree) | vacío. |
+| `git diff --name-only main...HEAD` | 8 archivos: `AGENTS.md`, `opencode.json`, `specs/database/07-...`, `specs/database/08-...`, `supabase/README.md` y las 3 migraciones. Ninguno en `app/`. |
+| `git diff --name-only main...HEAD -- app next.config.ts package.json package-lock.json proxy.ts` | vacío. |
+| `Select-String '\b(dynamic\|revalidate\|fetchCache\|runtime\|dynamicParams\|prefetch)\s*='` en `app/**` | sin coincidencias. |
+| `Get-ChildItem -Recurse postcss.config.*, tailwind.config.*` | sin coincidencias fuera de `node_modules`. |
+| MCP `list_tables`, `list_migrations`, `execute_sql` | ver tabla de criterios. |
+
+### Criterios
+
+| # | Criterio | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `list_tables` incluye `users` con 10 columnas y PK en `id` | PASS | 10 columnas en orden (`id, daycare_id, role, status, full_name, avatar_url, notify_on_post, daily_summary_enabled, created_at, updated_at`), `primary_keys: ["id"]`, `rls_enabled: true`, `rows: 1`. |
+| 2 | FK `users_daycare_fkey` → `daycares(id)` con `on delete restrict` | PASS | `pg_constraint`: `FOREIGN KEY (daycare_id) REFERENCES daycares(id) ON DELETE RESTRICT`; `list_tables` la reporta como `foreign_key_constraints`. |
+| 3 | `enum_range` exactos | PASS | `user_role` → `{admin,staff,parent}`; `user_status` → `{pending,active}`. |
+| 4 | Ambos tipos en `public` | PASS | `pg_type` + `pg_namespace`: `nspname = 'public'`, `typtype = 'e'`, 3 y 2 labels. |
+| 5 | `select count(*) from public.users` = `1` | PASS | `[{"total":1}]`. |
+| 6 | Fila del seed con id, nombre, rol, estado y daycare correctos | PASS | `d3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d` / `Caro Rojas` / `admin` / `active` / `daycare_matches: true`, `daycare_slug: sala-soles`, defaults `true/true`. |
+| 7 | Re-ejecutar el seed en tx con `rollback` deja el conteo en 1 | PASS | `total_after_rollback = 1`; refuerzo con CTE escribible: `filas_reales = 1`, `insertadas_por_reseed = 0`. |
+| 8 | `pg_class.relrowsecurity` es `true` | PASS | `[{"relrowsecurity":true}]`. |
+| 9 | Sin filas de `anon`/`authenticated` en `role_table_grants` | PASS | 14 filas, solo `postgres` y `service_role` (DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE). |
+| 10 | `has_type_privilege` false/false para anon y authenticated, true para service_role | PASS | `user_role` y `user_status`: `anon false`, `authenticated false`, `service_role true`. |
+| 11 | Trigger `users_set_updated_at` → `public.set_updated_at()` | PASS | `pg_trigger` unido a `pg_proc`: `[{"tgname":"users_set_updated_at","proname":"set_updated_at","nspname":"public"}]`. |
+| 12 | Un `update` sube `updated_at` por encima de `created_at` | PASS | Dentro de tx revertida: `updated_at_mayor: true` (`04:02:33` vs `03:58:07`); tras `rollback`, `updated_at = created_at` (`intacto: true`). |
+| 13 | Borrar `sala-soles` en tx con `rollback` falla por la FK | PASS | `ERROR 23503: ... violates foreign key constraint "users_daycare_fkey" ... Key (id)=(1af510f7-...) is still referenced from table "users"`. Después: `daycares = 1`. |
+| 14 | Los 3 archivos existen y sus `<version>` coinciden con `list_migrations` | PASS | `20261027035735_create_user_enums.sql`, `20261027035751_create_users.sql`, `20261027035807_seed_users_demo.sql`; el SQL en `supabase_migrations.schema_migrations` coincide con el de los archivos salvo el comentario de cabecera. |
+| 15 | `supabase/README.md` documenta la sección **Enums** | PASS | Sección `## Enums` (líneas 32–56) con la guarda `pg_type`/`pg_namespace`, el `revoke all on type ... from public, anon, authenticated` y el `grant usage ... to service_role`; además query de comprobación `has_type_privilege` en *Comprobaciones útiles*. |
+| 16 | `npx tsc --noEmit` sin errores | PASS | exit 0. |
+| 17 | Sin cambios en `app/`, `package.json`, `package-lock.json`, `next.config.ts` ni `proxy.ts` | PASS | `git diff --name-only main...HEAD` no contiene ninguna de esas rutas. |
+
+### Contraste con documentación
+
+- **Next.js (Context7 `/vercel/next.js` + doc vendorizada `node_modules/next/dist/docs/`):** la doc muestra `revalidate`, `dynamic`, `fetchCache` y `runtime` como segment options vigentes, y `partialPrefetching` exige `cacheComponents` (`next dev`/`next build` fallan con error de validación si falta). Nada de eso aplica a esta spec, que no toca `app/`; el grep sobre `app/**` confirma 0 usos de esas configs y el build sigue levantando con `cacheComponents` + `partialPrefetching`.
+- **Supabase (skill local + doc de RLS):** cerrar la tabla con `enable row level security` + `revoke all ... from anon, authenticated` en la misma migración, sin policies, es el patrón de la spec. El extra de esta corrida es el cierre de `USAGE` sobre los enums: por defecto Postgres se lo concede a `PUBLIC`, así que se revoca y se reintroduce solo para `service_role`, tal como reporta `has_type_privilege`.
+- **Postgres (regla 6 de `supabase/README.md`):** `create type` no admite `if not exists`, y la corrida confirmó que la guarda sobre `pg_type` permite re-aplicar la migración sin romper.
+
+### Playwright
+
+Esta spec no tiene criterios visuales ni de DOM; la pasada fue un smoke de regresión para confirmar que `supabase/` no rompió la app, que sigue con mocks.
+
+- `http://localhost:3000/` → 200, consola con 0 errores y 0 warnings, 3 `article`, `aside` visible, saludo "Buenas, Caro", `scrollWidth` = `innerWidth`.
+- `http://localhost:3000/ninos` → 200, 0 errores y 0 warnings, 8 enlaces `/ninos/<slug>`, badge "8 niños", `h1` "Niños", `scrollWidth` = `innerWidth`.
+- Capturas: `.playwright-mcp/verify-spec08-feed-1440.png`, `.playwright-mcp/verify-spec08-ninos-1440.png`.
+- `verify-spec08-feed-1440.png` contra `references/screenshots/feed.png`: el tramo común (cabecera "GUARDERÍA · SALA SOLES", "Buenas, Caro", "12 niños · martes 17 jun", composer, "PUBLICADO HOY" y el primer post) coincide en layout, jerarquía, colores, tipografía y copy. La referencia está recortada a 904px de ancho, así que la comparación es de estructura, no pixel a pixel.
+- El dev server del puerto 3000 era un proceso del usuario (PID 29700); se reutilizó y no se mató. El `npm run dev` propio se cayó solo por ese conflicto de puerto y no se usó.
+
+### Archivos modificados en esta corrida
+
+- `specs/database/08-users-table-y-enums.md`: casillas marcadas y esta sección agregada.
+- Nada en `app/`, `supabase/` ni configuración: no hubo fallas que corregir.
+
+### Pendientes y riesgos
+
+- **La corrida escribe en la base para verificar.** El criterio 7 re-ejecuta el insert del seed y el 12 hace un `update`; ambos dentro de transacciones revertidas. El estado final quedó verificado intacto (`users = 1`, `demo_intacto = 1`, `daycares = 1`).
+- **El viewport real de Playwright es 1718px**, no 1440px: el dev server del usuario está maximizado y `browser_resize` no aplica sobre una ventana así. Los nombres de las capturas dicen `1440` por convención de la casa; el ancho medido es el que figura en la evidencia.
+- **`opencode.json` está commiteado en esta rama** dentro del commit `46decc1`, junto con el `AGENTS.md` y la mudanza de `specs/07` a `specs/database/`. Nada de eso lo produjo esta spec; si querés un historial limpio, convendría separar esos cambios del merge de la spec.
+- **Diferencia preexistente con el mockup:** el pie de la sidebar muestra un círculo negro con la inicial del usuario autenticado que la referencia no tiene. Es de SPEC 01 y está fuera del alcance de esta spec de base de datos.
+- **La tabla sigue inalcanzable desde el frontend** y `auth.users` sigue en 0 filas: son las decisiones de esta spec. Policies, grants y la FK a `auth.users` llegan con la spec de autenticación, que debe crear el usuario de Auth con el UUID `d3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d` para poder agregar la FK sin borrar la fila demo.
+- **Los enums restantes del diccionario** (`relationship_type`, `invitation_status`, `post_type`, `child_status`) todavía no existen; van a repetir el patrón documentado en `supabase/README.md`.
