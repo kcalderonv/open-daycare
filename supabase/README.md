@@ -55,6 +55,29 @@ revoke all on type public.user_role from public, anon, authenticated;
 grant usage on type public.user_role to service_role;
 ```
 
+## Auth
+
+- Las credenciales viven en `auth.users`; `public.users` guarda solo el perfil y comparte el UUID con `auth.users(id)` (`users_auth_fkey`, `on delete cascade`).
+- El usuario demo se siembra por migración con el UUID fijo `d3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d`, email confirmado y contraseña hasheada con `extensions.crypt`. Insertar en `auth.users` y `auth.identities` no es API pública de Supabase: si una actualización de GoTrue cambia el esquema, el login real lo detecta y el plan B es crear el usuario desde el Dashboard y ajustar el perfil.
+- El rol `authenticated` solo puede leer su propia fila de `public.users`; `anon` sigue sin grants.
+- `USAGE` de los enums se concede a `authenticated` junto con la policy, porque PostgREST lo necesita para serializar `role` y `status`.
+
+```sql
+-- Perfil propio
+drop policy if exists users_select_own on public.users;
+
+create policy users_select_own
+on public.users
+for select
+to authenticated
+using (id = (select auth.uid()));
+
+grant select on table public.users to authenticated;
+grant usage on type public.user_role, public.user_status to authenticated;
+```
+
+- La app nunca usa `service_role`: el seed y las policies se aplican con el MCP, no desde `app/`.
+
 ## Comprobaciones útiles
 
 ```sql

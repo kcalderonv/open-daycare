@@ -1,12 +1,19 @@
+import type { CurrentUser } from "@/app/_lib/auth";
 import { AppSidebar } from "@/app/_components/app-sidebar";
 import { Brand } from "@/app/_components/brand";
 import { PostComposerTrigger } from "@/app/_components/feed/post-composer-trigger";
 import { PlusIcon } from "@/app/_components/icons";
 
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({
+  children,
+  user,
+}: {
+  children: React.ReactNode;
+  user: CurrentUser;
+}) {
   return (
     <div className="flex min-h-dvh flex-1 bg-cream">
-      <AppSidebar />
+      <AppSidebar user={user} />
 
       <div className="flex min-w-0 flex-1 flex-col shell:h-dvh">
         <header className="flex items-center gap-3 border-b border-border bg-surface px-4 py-3 shell:hidden">

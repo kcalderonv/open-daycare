@@ -1,7 +1,7 @@
 ---
 description: Verifica los Acceptance criteria de un spec: corre los checks, valida Next.js con Context7, compara pantallas con Playwright y visión, corrige fallas y marca los checks con evidencia.
 mode: all
-model: opencode-go/qwen3.8-flash
+model: opencode-go/deepseek-v4.1-flash
 color: "#E0654A"
 permissions:
   - action: edit
