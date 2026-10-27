@@ -265,38 +265,38 @@ Específicas de esta spec:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` termina sin errores.
-- [ ] `npx tsc --noEmit` termina sin errores.
-- [ ] `npx eslint app` termina sin errores.
-- [ ] Los tres `supabase/migrations/<version>_*.sql` existen y sus `<version>` coinciden con `list_migrations`.
-- [ ] `auth.users` tiene exactamente 1 fila: `id = 'd3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d'`, `email = 'caro@opendaycare.com'`, `email_confirmed_at` no nulo y `encrypted_password` con prefijo `$2`.
-- [ ] `auth.identities` tiene 1 fila con `provider = 'email'`, `user_id` igual al UUID demo y `identity_data->>'email' = 'caro@opendaycare.com'`.
-- [ ] Existe la constraint `users_auth_fkey` de `public.users(id)` a `auth.users(id)` con `on delete cascade`.
-- [ ] Existe la policy `users_select_own` para `authenticated` con `using (id = auth.uid())`.
-- [ ] `has_table_privilege('authenticated', 'public.users', 'select')` es `true`; para `anon` es `false`.
-- [ ] `has_type_privilege('authenticated', 'public.user_role', 'usage')` y lo mismo con `user_status` son `true`; para `anon` son `false`.
-- [ ] Sin cookies, `GET /` responde 307 hacia `/login?next=%2F`.
-- [ ] Sin cookies, `/ninos` y `/ninos/mateo-fernandez` responden 307 hacia `/login` con su `next` codificado.
-- [ ] Sin cookies, `/login` y `/activar-cuenta` responden 200.
-- [ ] Sin cookies, `/ninos/no-existe` sigue respondiendo 404 (el 404 corre antes que el redirect).
-- [ ] `/login` muestra los labels EMAIL y CONTRASEÑA, el email arranca vacío y el CTA es un `<button type="submit">`, no un `Link`.
-- [ ] Con contraseña incorrecta, `/login` muestra `Email o contraseña incorrectos.` en un elemento con `role="alert"` y no crea cookie de sesión.
-- [ ] Con los campos vacíos, `/login` muestra `Ingresá tu email y tu contraseña.`.
-- [ ] Con `caro@opendaycare.com` / `opendaycare2026`, la app navega a `/` y existe una cookie cuyo nombre empieza con `sb-` y contiene `auth-token`.
-- [ ] La sidebar muestra "Caro Rojas", la inicial "C", el rol "Administración" y el saludo del feed sigue siendo "Buenas, Caro".
-- [ ] Recargar `/` mantiene la sesión y la sidebar con los datos reales.
-- [ ] Con sesión activa, `/login` redirige a `/`.
-- [ ] Entrar a `/login?next=%2Fninos` y autenticarse aterriza en `/ninos`.
-- [ ] Entrar a `/login?next=//example.com` y autenticarse aterriza en `/`.
-- [ ] "Cerrar sesión" navega a `/login`, elimina la cookie de sesión y un `GET /` posterior vuelve a responder 307.
-- [ ] Un usuario de Auth sin fila en `public.users` (creado y borrado durante la verificación) recibe `Tu cuenta no está habilitada. Contactá a la guardería.` y no conserva cookie de sesión.
-- [ ] `GET /login?error=no-account` con una sesión sin perfil no entra en bucle: se queda en `/login` y muestra el banner.
-- [ ] `/activar-cuenta` sigue siendo pública y su CTA "Activar mi cuenta" apunta a `/`.
-- [ ] La consola no muestra errores ni warnings de React en `/login`, `/` y `/ninos`.
-- [ ] A 390px, `/login` y su estado de error se ven completos y `documentElement.scrollWidth` no supera `innerWidth`.
-- [ ] `app/` no agrega `dynamic`, `revalidate`, `fetchCache`, `runtime` ni `dynamicParams`.
-- [ ] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
-- [ ] `package.json` y `package-lock.json` no cambian.
+- [x] `npm run build` termina sin errores.
+- [x] `npx tsc --noEmit` termina sin errores.
+- [x] `npx eslint app` termina sin errores.
+- [x] Los tres `supabase/migrations/<version>_*.sql` existen y sus `<version>` coinciden con `list_migrations`.
+- [x] `auth.users` tiene exactamente 1 fila: `id = 'd3f1c0a2-7b4e-4c8a-9b1d-2e6f5a0c8b7d'`, `email = 'caro@opendaycare.com'`, `email_confirmed_at` no nulo y `encrypted_password` con prefijo `$2`.
+- [x] `auth.identities` tiene 1 fila con `provider = 'email'`, `user_id` igual al UUID demo y `identity_data->>'email' = 'caro@opendaycare.com'`.
+- [x] Existe la constraint `users_auth_fkey` de `public.users(id)` a `auth.users(id)` con `on delete cascade`.
+- [x] Existe la policy `users_select_own` para `authenticated` con `using (id = auth.uid())`.
+- [x] `has_table_privilege('authenticated', 'public.users', 'select')` es `true`; para `anon` es `false`.
+- [x] `has_type_privilege('authenticated', 'public.user_role', 'usage')` y lo mismo con `user_status` son `true`; para `anon` son `false`.
+- [x] Sin cookies, `GET /` responde 307 hacia `/login?next=%2F`.
+- [x] Sin cookies, `/ninos` y `/ninos/mateo-fernandez` responden 307 hacia `/login` con su `next` codificado.
+- [x] Sin cookies, `/login` y `/activar-cuenta` responden 200.
+- [x] Sin cookies, `/ninos/no-existe` sigue respondiendo 404 (el 404 corre antes que el redirect).
+- [x] `/login` muestra los labels EMAIL y CONTRASEÑA, el email arranca vacío y el CTA es un `<button type="submit">`, no un `Link`.
+- [x] Con contraseña incorrecta, `/login` muestra `Email o contraseña incorrectos.` en un elemento con `role="alert"` y no crea cookie de sesión.
+- [x] Con los campos vacíos, `/login` muestra `Ingresá tu email y tu contraseña.`.
+- [x] Con `caro@opendaycare.com` / `opendaycare2026`, la app navega a `/` y existe una cookie cuyo nombre empieza con `sb-` y contiene `auth-token`.
+- [x] La sidebar muestra "Caro Rojas", la inicial "C", el rol "Administración" y el saludo del feed sigue siendo "Buenas, Caro".
+- [x] Recargar `/` mantiene la sesión y la sidebar con los datos reales.
+- [x] Con sesión activa, `/login` redirige a `/`.
+- [x] Entrar a `/login?next=%2Fninos` y autenticarse aterriza en `/ninos`.
+- [x] Entrar a `/login?next=//example.com` y autenticarse aterriza en `/`.
+- [x] "Cerrar sesión" navega a `/login`, elimina la cookie de sesión y un `GET /` posterior vuelve a responder 307.
+- [x] Un usuario de Auth sin fila en `public.users` (creado y borrado durante la verificación) recibe `Tu cuenta no está habilitada. Contactá a la guardería.` y no conserva cookie de sesión.
+- [x] `GET /login?error=no-account` con una sesión sin perfil no entra en bucle: se queda en `/login` y muestra el banner.
+- [x] `/activar-cuenta` sigue siendo pública y su CTA "Activar mi cuenta" apunta a `/`.
+- [x] La consola no muestra errores ni warnings de React en `/login`, `/` y `/ninos`.
+- [x] A 390px, `/login` y su estado de error se ven completos y `documentElement.scrollWidth` no supera `innerWidth`.
+- [x] `app/` no agrega `dynamic`, `revalidate`, `fetchCache`, `runtime` ni `dynamicParams`.
+- [x] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
+- [x] `package.json` y `package-lock.json` no cambian.
 
 ## Decisions
 
@@ -353,3 +353,100 @@ Específicas de esta spec:
 - Tests automatizados, modo oscuro e i18n.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+- **Fecha:** 2026-10-27
+- **Branch:** `spec-09-autenticacion-y-proteccion-de-rutas` (HEAD `d8fe313` "09-autenticacion-proteccion")
+- **Entorno:** Next.js 16.4.3 (Turbopack), dev server propio en `localhost:3000` (el PID 29700 ya no escuchaba) y detenido al terminar, Supabase remoto vía MCP, Playwright MCP.
+- **Resultado:** 32/32 criterios PASS. No se modificó código de producto: la implementación commiteada pasó tal cual.
+
+### Comandos ejecutados
+
+| Comando | Resultado | Evidencia |
+| --- | --- | --- |
+| `npm run build` | exit 0 | `✓ Compiled successfully in 2.6s`, `Finished TypeScript in 4.4s`, 16 páginas; rutas `/`, `/login`, `/ninos` como `◐` (PPR) y Proxy detectado. `.playwright-mcp/build-09.log` |
+| `npx tsc --noEmit` | exit 0, sin diagnósticos | `.playwright-mcp/tsc-09.log` |
+| `npx eslint app` | exit 0, sin diagnósticos | `.playwright-mcp/eslint-09.log` |
+| `list_migrations` (MCP) | 3 migraciones presentes | `20261027045257 seed_auth_demo_user`, `20261027045305 link_users_auth`, `20261027045306 open_users_self_read` |
+| `execute_sql` (MCP) | catálogo, grants, RLS y privs | ver tabla |
+| `curl` sin cookies | 307/200/404 | ver tabla |
+| Playwright MCP | login, logout, `next`, cookie, 390px, consola | ver tabla |
+
+### Criterios
+
+| # | Criterio (resumen) | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `npm run build` sin errores | PASS | exit 0; `✓ Compiled successfully in 2.6s` |
+| 2 | `npx tsc --noEmit` sin errores | PASS | exit 0, sin salida de diagnósticos |
+| 3 | `npx eslint app` sin errores | PASS | exit 0, sin salida de diagnósticos |
+| 4 | Tres migraciones con versión coincidente | PASS | archivos `20261027045257_seed_auth_demo_user.sql`, `20261027045305_link_users_auth.sql`, `20261027045306_open_users_self_read.sql` = `list_migrations` |
+| 5 | `auth.users` 1 fila demo correcta | PASS | `users_rows=1`, `demo_ok=1`, `email='caro@opendaycare.com'`, `email_confirmed_at` no nulo, `pw_prefix='$2a$'` |
+| 6 | `auth.identities` 1 fila email | PASS | `identities_rows=1`, `identity_ok=1` (provider `email`, `user_id` demo, `identity_data->>'email'` correcto) |
+| 7 | FK `users_auth_fkey` con cascade | PASS | `FOREIGN KEY (id) REFERENCES auth.users(id) ON DELETE CASCADE`, `confdeltype='c'` |
+| 8 | Policy `users_select_own` | PASS | `roles={authenticated}`, `cmd=SELECT`, `qual=(id = ( SELECT auth.uid() AS uid))`; 1 sola policy en `public.users` |
+| 9 | Grants `select` de `users` | PASS | `authenticated=true`, `anon=false` |
+| 10 | USAGE de `user_role`/`user_status` | PASS | `authenticated=true` en ambos; `anon=false` en ambos |
+| 11 | Sin cookies `/` → 307 `/login?next=%2F` | PASS | `HTTP/1.1 307`, `location: /login?next=%2F` |
+| 12 | Sin cookies `/ninos` y `/ninos/mateo-fernandez` | PASS | `/ninos` → `/login?next=%2Fninos`; `/ninos/mateo-fernandez` → `/login?next=%2Fninos%2Fmateo-fernandez` |
+| 13 | Sin cookies `/login` y `/activar-cuenta` → 200 | PASS | ambos `HTTP/1.1 200 OK` sin `location` |
+| 14 | `/ninos/no-existe` → 404 | PASS | `HTTP/1.1 404 Not Found` (el proxy corta antes del redirect) |
+| 15 | Labels, email vacío y CTA botón | PASS | labels `EMAIL`/`CONTRASEÑA`; `<input name="email">` sin atributo `value` y `defaultValue=""` (SSR idéntico); CTA `BUTTON[type=submit]` "Iniciar sesión" |
+| 16 | Contraseña incorrecta | PASS | `role="alert"` = `Email o contraseña incorrectos.`; `cookies=[]` |
+| 17 | Campos vacíos | PASS | `role="alert"` = `Ingresá tu email y tu contraseña.` |
+| 18 | Login demo navega a `/` y crea cookie | PASS | `url=/`, cookie `sb-iquauyptfzwilctcoqgb-auth-token` |
+| 19 | Sidebar con datos reales | PASS | aside: inicial `C`, nombre `Caro Rojas`, rol `Administración`; `h1` = `Buenas, Caro` |
+| 20 | Recarga mantiene sesión | PASS | tras `reload`: `url=/`, cookie presente, sidebar `Caro Rojas / Administración` |
+| 21 | Con sesión, `/login` → `/` | PASS | `finalPath=/` (también en la variante `GET /login`) |
+| 22 | `next=/ninos` aterriza en `/ninos` | PASS | `input[name=next]="/ninos"` → `url=/ninos` |
+| 23 | `next=//example.com` aterriza en `/` | PASS | `input[name=next]="/"` → `url=/`, `origin=http://localhost:3000` |
+| 24 | Cerrar sesión limpia todo | PASS | click → `url=/login`, `cookies=[]`; `curl /` → `307 location: /login?next=%2F` |
+| 25 | Usuario de Auth sin perfil | PASS | usuario temporal sin fila → `role="alert"` = `Tu cuenta no está habilitada. Contactá a la guardería.`, `cookies=[]`; usuario borrado al terminar |
+| 26 | `?error=no-account` sin bucle | PASS | con sesión sin perfil, `GET /` → `/login?error=no-account` estable 6 muestras consecutivas (1 s) y banner `Tu cuenta no está habilitada. Ingresá con otra cuenta o contactá a la guardería.`; visita directa al mismo URL también se queda |
+| 27 | `/activar-cuenta` pública y CTA | PASS | 200 sin cookies y con sesión; `link "Activar mi cuenta"` → `href="/"` |
+| 28 | Consola sin errores ni warnings | PASS | 102 entradas en `.playwright-mcp/console-2026-10-27T05-23-00-517Z.log`, 0 `[ERROR]`/`[WARNING]` en `/login`, `/`, `/ninos`; `browser_console_messages` = `Errors: 0, Warnings: 0` |
+| 29 | 390px sin scroll horizontal | PASS | `/login`: `scrollWidth=390`, `innerWidth=390`; estado de error: `scrollWidth=390`, alerta 342×43 y CTA 342×52 visibles |
+| 30 | Sin `dynamic`/`revalidate`/`fetchCache`/`runtime`/`dynamicParams` | PASS | grep de `export const <config>` en `app/`: 0 coincidencias (no se cuentan `await connection()` ni `instant = false`, ambos aprobados en Decisions) |
+| 31 | Sin `any`, `@ts-ignore`, `style={{}}` ni hex | PASS | grep en `app/`: 0 coincidencias de `\bany\b`, `@ts-ignore`/`@ts-expect-error`/`@ts-nocheck`, `style={{`, `#hex` en `.tsx`/`.ts` |
+| 32 | `package.json` y `package-lock.json` sin cambios | PASS | `git diff --stat a9fa2c7..HEAD -- package.json package-lock.json` vacío; working tree sin cambios en esos archivos |
+
+### Documentación contrastada
+
+- `node_modules/next/dist/docs/01-app/02-guides/authentication.md:1024-1033`: el Proxy es para chequeos optimistas y **no** debe consultar la DB. `proxy.ts` solo usa `getClaims()`; la consulta de perfil vive en la DAL (`app/_lib/auth.ts`).
+- `node_modules/next/dist/docs/01-app/02-guides/authentication-with-cache-components.md:45` y `03-api-reference/03-file-conventions/02-route-segment-config/instant.md:120`: `instant = false` es el opt-out oficial de la validación de Instant Navigation; no cambia el modelo de render.
+- `node_modules/next/dist/docs/01-app/03-api-reference/04-functions/connection.mdx`: `connection()` difiere al request-time; coincide con el uso en `getCurrentUser`.
+- Context7 (`/vercel/next.js/v16.2.9`): mismas dos conclusiones (optimistic checks + `connection()` con `<Suspense>`).
+
+### Capturas (`.playwright-mcp/`)
+
+- `verify-09-feed-1440.png` — `/` con sesión real (sidebar "Caro Rojas / Administración").
+- `verify-09-ninos-1440.png` — `/ninos` con sesión.
+- `verify-09-login-390.png` — `/login` a 390px.
+- `verify-09-login-error-390.png` — estado de error a 390px.
+- `verify-09-no-profile-error.png` — error de cuenta sin perfil en el formulario.
+- `verify-09-no-account-banner.png` — banner `?error=no-account` con sesión sin perfil.
+
+No hay captura de referencia de `/login` en `references/screenshots/`, así que no se declara paridad visual: solo se verificó contenido, estado y medidas del criterio 29.
+
+### Archivos modificados
+
+- `specs/database/09-autenticacion-y-proteccion-de-rutas.md` (checkboxes y este reporte).
+- Ningún archivo de `app/`, `utils/`, `proxy.ts`, `supabase/` ni `package*.json`.
+- Artefactos de verificación: `build-09.log`, `tsc-09.log`, `eslint-09.log`, `console-2026-10-27T05-23-00-517Z.log` y las capturas `verify-09-*.png` (todo en `.playwright-mcp/`, gitignored).
+
+### Datos temporales de verificación
+
+- Se creó `verify09-temp@opendaycare.com` en `auth.users`/`auth.identities` y, para poder obtener una sesión real, un perfil temporal en `public.users` que se borró antes de probar el bucle.
+- Estado final verificado: `auth.users = 1`, `auth.identities = 1`, `public.users = 1`.
+- Sesiones/identidades del usuario demo: sin cambios.
+
+### Observaciones y riesgos
+
+- El campo EMAIL arranca vacío en el HTML (`value` ausente, `defaultValue=""`), pero el perfil persistente de Playwright autocompleta credenciales del demo y el value aparece relleno en las capturas. No es precarga de la app; conviene limpiar autofill al hacer QA manual.
+- El HTML servido de `/login` contiene el formulario dos veces durante el stream (fallback de `<Suspense>` + contenido resuelto), con `id="login-email"` repetido de forma transitoria. Tras la hidratación queda un solo `<form>` y la consola no reporta warnings; se deja como observación de accesibilidad, no como fallo de criterio.
+- `instant = false` y `await connection()` quedan como decisiones de la spec; el criterio 30 solo prohíbe configs de ruta y no se ven afectados.
+- **Ruido solo-dev en la terminal:** cuando una sesión sin perfil entra a `/`, el layout lanza `NEXT_REDIRECT` dentro del `<Suspense>` y Next 16 registra en la **salida del servidor** `Error: Route "/" could not validate instant` / `An error occurred while attempting to validate instant UI` (traza en `app/(app)/layout.tsx:13`). No aparece en la consola del navegador (criterio 28 sigue en verde), no afecta al build de producción y solo ocurre en ese camino de error con `next dev`. Si molesta en desarrollo, el arreglo sería resolver el caso sin perfil antes de streamear el shell, algo que la spec no pide.
+
+### Pendientes
+
+- Ninguno bloqueante. Si el usuario lo aprueba, el `**Status:**` puede pasar a `Implementado`.
