@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useRef,
   useState,
@@ -36,9 +37,10 @@ export function PostComposerProvider({
   const dialogRef = useRef<ModalDialogHandle>(null);
   const [session, setSession] = useState(0);
 
-  function openComposer() {
+  // Stable identity so context consumers do not re-render on every provider render.
+  const openComposer = useCallback(() => {
     dialogRef.current?.open();
-  }
+  }, []);
 
   function closeComposer() {
     dialogRef.current?.close();

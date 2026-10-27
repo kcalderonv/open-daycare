@@ -107,10 +107,10 @@ export function PostForm({ onClose }: PostFormProps) {
   const objectUrls = useRef<string[]>([]);
 
   useEffect(() => {
-    const urls = objectUrls.current;
-
+    // Read the ref inside the cleanup: removePhoto replaces the array, so a
+    // snapshot taken at mount would miss URLs created after a removal.
     return () => {
-      urls.forEach((url) => URL.revokeObjectURL(url));
+      objectUrls.current.forEach((url) => URL.revokeObjectURL(url));
     };
   }, []);
 
