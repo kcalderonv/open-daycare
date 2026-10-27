@@ -1,6 +1,6 @@
 # Migraciones de Supabase
 
-Este proyecto administra el esquema de Supabase por MCP. No hay Supabase CLI, Docker local ni `config.toml`.
+Este proyecto administra el esquema de Supabase por MCP. No se usa la CLI para migraciones, ni Docker local, ni `config.toml`; la CLI solo sirve para login y generación de tipos (ver el README raíz).
 
 ## Reglas
 
