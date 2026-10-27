@@ -96,6 +96,7 @@ export function ActivationForm({
         autoComplete="new-password"
         placeholder="••••••••"
         disabled={isPending}
+        highlighted
         className="mb-[18px]"
       />
 

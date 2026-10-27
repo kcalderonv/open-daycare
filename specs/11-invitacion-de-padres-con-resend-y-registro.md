@@ -618,46 +618,46 @@ Específicas de esta spec:
 
 ## Acceptance criteria
 
-- [ ] `npm run build` termina sin errores y no registra rutas nuevas.
-- [ ] `npx tsc --noEmit` sin errores.
-- [ ] `npx eslint app` sin errores.
+- [x] `npm run build` termina sin errores y no registra rutas nuevas.
+- [x] `npx tsc --noEmit` sin errores.
+- [x] `npx eslint app` sin errores.
 - [ ] `grep -rln '"use client"' app/` devuelve exactamente 8 archivos: los 6 de SPEC 05 más `auth/activation-form.tsx` y `children/parent-invite-form.tsx`; `_lib/email/resend.ts` no aparece.
-- [ ] `app/_lib/email/resend.ts` importa `server-only` y `new Resend(` aparece dentro de una función, no en el top-level del módulo.
-- [ ] `public.relationship_type` tiene los labels `father, mother, guardian` y `public.invitation_status` tiene `pending, accepted, expired, cancelled`, en ese orden de `pg_enum.enumsortorder`.
-- [ ] `public.invitations` y `public.parent_children` tienen `relrowsecurity = true` y 14 y 5 columnas respectivamente.
-- [ ] `has_table_privilege('anon', 'public.invitations', 'select')` y `has_table_privilege('anon', 'public.parent_children', 'select')` devuelven `false`.
-- [ ] `has_table_privilege('authenticated', 'public.invitations', 'insert')` devuelve `true` y `has_table_privilege('authenticated', 'public.parent_children', 'insert')` devuelve `false`.
-- [ ] Existe el índice único parcial `invitations_pending_child_email_key` con predicado `status = 'pending'`.
-- [ ] Existen `current_staff_daycare_id()`, `get_invitation_preview(text)`, `accept_invitation(text)` y `email_has_account(text)` con los grants descritos; `has_function_privilege('anon', 'public.accept_invitation(text)', 'execute')` es `false`.
-- [ ] `select public.get_invitation_preview('ZZZZZ')` devuelve una fila con `status = 'not_found'`.
-- [ ] En `/ninos` se puede crear un niño y su perfil abre en `/ninos/<uuid>` (requisito para poder invitar).
-- [ ] El panel del modal muestra literalmente "CÓDIGO DE INVITACIÓN", "Se genera al enviar" y "Vence en 7 días", y ningún código de 5 caracteres.
-- [ ] Con nombre "Diego Fernández", email válido y "Papá", "Enviar invitación" cierra el modal y la tarjeta muestra "Diego Fernández", "Papá · invitación enviada" y el badge PENDIENTE.
-- [ ] La fila nueva de `invitations` tiene `code ~ '^[A-Z0-9]{5}$'`, `status = 'pending'`, `relationship = 'father'`, `email` en minúsculas, `expires_at` entre 6 y 7 días después de `created_at` y `sent_at` no nulo.
+- [x] `app/_lib/email/resend.ts` importa `server-only` y `new Resend(` aparece dentro de una función, no en el top-level del módulo.
+- [x] `public.relationship_type` tiene los labels `father, mother, guardian` y `public.invitation_status` tiene `pending, accepted, expired, cancelled`, en ese orden de `pg_enum.enumsortorder`.
+- [x] `public.invitations` y `public.parent_children` tienen `relrowsecurity = true` y 14 y 5 columnas respectivamente.
+- [x] `has_table_privilege('anon', 'public.invitations', 'select')` y `has_table_privilege('anon', 'public.parent_children', 'select')` devuelven `false`.
+- [x] `has_table_privilege('authenticated', 'public.invitations', 'insert')` devuelve `true` y `has_table_privilege('authenticated', 'public.parent_children', 'insert')` devuelve `false`.
+- [x] Existe el índice único parcial `invitations_pending_child_email_key` con predicado `status = 'pending'`.
+- [x] Existen `current_staff_daycare_id()`, `get_invitation_preview(text)`, `accept_invitation(text)` y `email_has_account(text)` con los grants descritos; `has_function_privilege('anon', 'public.accept_invitation(text)', 'execute')` es `false`.
+- [x] `select public.get_invitation_preview('ZZZZZ')` devuelve una fila con `status = 'not_found'`.
+- [x] En `/ninos` se puede crear un niño y su perfil abre en `/ninos/<uuid>` (requisito para poder invitar).
+- [x] El panel del modal muestra literalmente "CÓDIGO DE INVITACIÓN", "Se genera al enviar" y "Vence en 7 días", y ningún código de 5 caracteres.
+- [x] Con nombre "Diego Fernández", email válido y "Papá", "Enviar invitación" cierra el modal y la tarjeta muestra "Diego Fernández", "Papá · invitación enviada" y el badge PENDIENTE.
+- [x] La fila nueva de `invitations` tiene `code ~ '^[A-Z0-9]{5}$'`, `status = 'pending'`, `relationship = 'father'`, `email` en minúsculas, `expires_at` entre 6 y 7 días después de `created_at` y `sent_at` no nulo.
 - [ ] El correo llega a la bandeja del destinatario con el código de la fila, el nombre del niño, la sala y el enlace `/activar-cuenta?code=<CODE>` (verificación manual del usuario, con `RESEND_FROM_EMAIL` apuntando a un remitente aceptado por Resend).
-- [ ] Invitar dos veces al mismo email y niño con la primera ya enviada deja la primera en `cancelled` y exactamente una `pending` con código distinto.
-- [ ] Invitar a un email que ya tiene cuenta no crea filas, no llama a Resend y muestra inline "Ese email ya tiene una cuenta. Pedile a la guardería que vincule al niño."
-- [ ] Con `RESEND_API_KEY` inválida, el modal muestra "No pudimos enviar la invitación. Intentá de nuevo en unos minutos.", la fila queda `pending` con `sent_at` nulo y el modal sigue abierto.
-- [ ] Reintentar tras esa falla reutiliza el mismo `id` y el mismo `code`, y al tener éxito escribe `sent_at`.
-- [ ] `/activar-cuenta` sin `?code=` muestra "Necesitás el enlace que te llegó por correo." y un link a `/login`.
-- [ ] `/activar-cuenta?code=ZZZZZ` muestra "No encontramos esa invitación." con 200, sin datos del niño.
-- [ ] Una invitación con `expires_at` en el pasado muestra "Esa invitación venció…" y deja de listarse en la tarjeta.
-- [ ] Una invitación con `status = 'cancelled'` muestra "Esa invitación fue cancelada…" y una `accepted` muestra "Esa invitación ya fue usada…".
-- [ ] Con código válido, la página muestra el nombre del niño, la sala, el email de la invitación y el código, ambos `readOnly`, y no muestra el campo de nombre.
-- [ ] Enviar con contraseña de 7 caracteres bloquea, muestra "La contraseña debe tener al menos 8 caracteres." y enfoca el campo.
-- [ ] Enviar sin marcar el consentimiento bloquea y muestra "Marcá la autorización para continuar."
-- [ ] Activar con contraseña de 8 o más caracteres y consentimiento marcado redirige a `/` con sesión iniciada y el nombre del padre en la sidebar.
-- [ ] Después de activar: `public.users` tiene una fila con `role = 'parent'`, `status = 'active'` y el daycare del niño; `parent_children` tiene una fila con el parentesco de la invitación; la invitación queda `accepted` con `accepted_at` no nulo; `children.photo_consent` es `true`.
-- [ ] Reabrir el mismo enlace después de activar muestra "Esa invitación ya fue usada…".
-- [ ] Reinvitar al email ya activado muestra el error de cuenta existente.
-- [ ] Un padre autenticado no ve niños ajenos: `getChildren` con su sesión devuelve 0 filas y `/ninos` muestra el estado vacío, sin error.
-- [ ] La consola del navegador no muestra errores ni warnings de React en el modal, en `/ninos/[id]` después del envío ni en `/activar-cuenta` en ninguno de los estados.
-- [ ] `app/` no importa nada de `references/` y no existen `app/_data/auth.ts` ni `app/_data/parent-invite.ts`.
-- [ ] `.env.template` contiene `RESEND_FROM_EMAIL` y `NEXT_PUBLIC_APP_URL`; ningún archivo de `app/` contiene `re_` ni la key literal.
-- [ ] `/activar-cuenta` a 390px no desborda (`documentElement.scrollWidth <= innerWidth`) y el formulario completo entra con scroll vertical.
-- [ ] Capturas en `.playwright-mcp/invite-pending-1440.png`, `.playwright-mcp/activate-form-1440.png`, `.playwright-mcp/activate-form-390.png` y `.playwright-mcp/activate-expired-1440.png`, comparadas con `vincular-padre.dc.html` y `activar-cuenta.dc.html`.
-- [ ] Ningún identificador nuevo está en español; el español aparece solo en copy visible.
-- [ ] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
+- [x] Invitar dos veces al mismo email y niño con la primera ya enviada deja la primera en `cancelled` y exactamente una `pending` con código distinto.
+- [x] Invitar a un email que ya tiene cuenta no crea filas, no llama a Resend y muestra inline "Ese email ya tiene una cuenta. Pedile a la guardería que vincule al niño."
+- [x] Con `RESEND_API_KEY` inválida, el modal muestra "No pudimos enviar la invitación. Intentá de nuevo en unos minutos.", la fila queda `pending` con `sent_at` nulo y el modal sigue abierto.
+- [x] Reintentar tras esa falla reutiliza el mismo `id` y el mismo `code`, y al tener éxito escribe `sent_at`.
+- [x] `/activar-cuenta` sin `?code=` muestra "Necesitás el enlace que te llegó por correo." y un link a `/login`.
+- [x] `/activar-cuenta?code=ZZZZZ` muestra "No encontramos esa invitación." con 200, sin datos del niño.
+- [x] Una invitación con `expires_at` en el pasado muestra "Esa invitación venció…" y deja de listarse en la tarjeta.
+- [x] Una invitación con `status = 'cancelled'` muestra "Esa invitación fue cancelada…" y una `accepted` muestra "Esa invitación ya fue usada…".
+- [x] Con código válido, la página muestra el nombre del niño, la sala, el email de la invitación y el código, ambos `readOnly`, y no muestra el campo de nombre.
+- [x] Enviar con contraseña de 7 caracteres bloquea, muestra "La contraseña debe tener al menos 8 caracteres." y enfoca el campo.
+- [x] Enviar sin marcar el consentimiento bloquea y muestra "Marcá la autorización para continuar."
+- [x] Activar con contraseña de 8 o más caracteres y consentimiento marcado redirige a `/` con sesión iniciada y el nombre del padre en la sidebar.
+- [x] Después de activar: `public.users` tiene una fila con `role = 'parent'`, `status = 'active'` y el daycare del niño; `parent_children` tiene una fila con el parentesco de la invitación; la invitación queda `accepted` con `accepted_at` no nulo; `children.photo_consent` es `true`.
+- [x] Reabrir el mismo enlace después de activar muestra "Esa invitación ya fue usada…".
+- [x] Reinvitar al email ya activado muestra el error de cuenta existente.
+- [x] Un padre autenticado no ve niños ajenos: `getChildren` con su sesión devuelve 0 filas y `/ninos` muestra el estado vacío, sin error.
+- [x] La consola del navegador no muestra errores ni warnings de React en el modal, en `/ninos/[id]` después del envío ni en `/activar-cuenta` en ninguno de los estados.
+- [x] `app/` no importa nada de `references/` y no existen `app/_data/auth.ts` ni `app/_data/parent-invite.ts`.
+- [x] `.env.template` contiene `RESEND_FROM_EMAIL` y `NEXT_PUBLIC_APP_URL`; ningún archivo de `app/` contiene `re_` ni la key literal.
+- [x] `/activar-cuenta` a 390px no desborda (`documentElement.scrollWidth <= innerWidth`) y el formulario completo entra con scroll vertical.
+- [x] Capturas en `.playwright-mcp/invite-pending-1440.png`, `.playwright-mcp/activate-form-1440.png`, `.playwright-mcp/activate-form-390.png` y `.playwright-mcp/activate-expired-1440.png`, comparadas con `vincular-padre.dc.html` y `activar-cuenta.dc.html`.
+- [x] Ningún identificador nuevo está en español; el español aparece solo en copy visible.
+- [x] No hay `any`, `@ts-ignore`, `style={{}}` ni hex sueltos en el JSX de `app/`.
 
 ## Decisions
 
@@ -715,3 +715,125 @@ Específicas de esta spec:
 - Tests automatizados más allá de Playwright y las verificaciones SQL por MCP.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+**Fecha:** 2026-10-27 · **Branch:** `spec-11-invitacion-de-padres-con-resend-y-registro` · **Commit de partida:** `bb131e6 "invitacion-padres-resend-reistro"` · **Agente:** `spec-verifier`
+
+Punto de partida: `git status --short` vacío. Al cerrar la corrida se detuvieron el dev server de `:3000` y el server de mocks de `:8971`, y se restauró el estado de la base (0 invitaciones, 0 vínculos, 1 usuario, 1 niño). La key de Resend se reemplazó temporalmente por una inválida para el criterio 20 y se restauró desde una copia exacta.
+
+### Correcciones aplicadas en esta corrida
+
+1. **`app/(app)/ninos/page.tsx` — estado vacío para padres (criterio 33).** Con un padre autenticado, `getRooms` devuelve 0 filas por RLS, `groups` queda vacío y `ChildrenSearch` no renderizaba nada: la página mostraba solo el título. Se agregó `ChildrenEmpty` ("Todavía no hay niños para mostrar.") cuando `groups.length === 0`. Antes: `main = "GESTIÓNNiños"`. Después: `main = "GESTIÓNNiñosTodavía no hay niños para mostrar."`, 0 tarjetas, sin `role="alert"`.
+2. **`app/_components/auth/activation-form.tsx` — borde activo de la contraseña (criterio 38).** El mock de `activar-cuenta.dc.html` pinta `CREAR CONTRASEÑA` con el borde coral de campo activo; la reescritura lo había perdido. Se agregó `highlighted` y `getComputedStyle().borderTopColor` pasó a `rgb(242, 167, 142)` (`--color-coral`), igual que el mock.
+
+### Comandos ejecutados
+
+| Comando / consulta | Resultado |
+| --- | --- |
+| `npm run build` | ✅ exit 0 · 8/8 páginas · mismas 6 rutas (`/`, `/activar-cuenta`, `/login`, `/ninos`, `/ninos/[id]`, `/_not-found`) |
+| `npx tsc --noEmit` | ✅ exit 0, sin salida |
+| `npx eslint app` | ✅ exit 0, sin salida (`npm run lint` no se usa: falla por `references/pantallas/support.js`, preexistente) |
+| `Select-String '"use client"'` | ❌ 12 archivos, no 8 (ver nota ①) |
+| `server-only` / `new Resend(` en `resend.ts` | ✅ líneas 1 y 33, dentro de `sendInvitationEmail` |
+| `references/` en `app/` | ✅ 0 coincidencias |
+| `app/_data/auth.ts`, `app/_data/parent-invite.ts` | ✅ no existen |
+| `: any` / `@ts-ignore` / `style={{` | ✅ 0 coincidencias |
+| `#[0-9a-fA-F]{3,8}` en `app/` | ✅ 16 coincidencias, todas en el HTML del correo (`invitation-email.ts`), ninguna en JSX |
+| `export const (dynamic|revalidate|fetchCache|runtime)` | ✅ 0 coincidencias |
+| Enums (`pg_enum`) | ✅ `father,mother,guardian` · `pending,accepted,expired,cancelled` |
+| RLS + columnas | ✅ `invitations` 14, `parent_children` 5, RLS activo en ambas |
+| Grants de tablas | ✅ `anon` sin `select`; `authenticated` con `select,insert,update` en `invitations` y solo `select` en `parent_children` |
+| Índice parcial | ✅ `(child_id, lower(email)) WHERE status = 'pending'` |
+| Funciones | ✅ `accept_invitation`, `email_has_account`, `current_staff_daycare_id` solo `authenticated`; `get_invitation_preview` `anon` + `authenticated`; `anon` no ejecuta `accept_invitation` |
+| `get_invitation_preview('ZZZZZ')` | ✅ una fila con `status = 'not_found'` |
+| `get_advisors(security)` | ✅ sin hallazgos nuevos de RLS; los avisos de `SECURITY DEFINER` son intencionales |
+| Dev log de Resend | ✅ `401 API key is invalid` durante el criterio 20 y envíos aceptados con la key real |
+
+### Contraste con la documentación de Next.js (Context7 `/vercel/next.js` + docs vendorizadas 16.4.3)
+
+- **`cookies()` dentro de `<Suspense>`.** `node_modules/next/dist/docs/01-app/02-guides/authentication-with-cache-components.md:117`: *"A component that reads the session must sit behind a `<Suspense>` boundary. With Cache Components, reading `cookies()` outside a boundary is a build error."* La página de activación resuelve `?code=` y la RPC dentro de `<Suspense>` (`page.tsx`). Correcto.
+- **`connection()` para valores inestables.** `01-app/01-getting-started/08-caching.md:335`: *"To generate unique values per request, defer to request time by calling `connection()` … and wrap the component in `<Suspense>`"*. Es exactamente lo que hace `ActivationContent`: sin ese `await connection()`, el build reportaba `Date.now()` inestable al construir el cliente de Supabase. Correcto.
+- **`server-only`.** `01-app/02-guides/data-security.mdx` y `01-app/01-getting-started/05-server-and-client-components.md`: el paquete provoca un error de build si el módulo se importa desde un Client Component. `app/_lib/email/resend.ts` lo importa en la línea 1. Correcto.
+- **Cookies en Server Actions.** `01-app/01-getting-started/07-mutating-data.mdx`: *"You can `get`, `set`, and `delete` cookies inside a Server Action"*. `signUp` escribe la sesión desde `activateAccount` y el `redirect("/")` la conserva. Correcto.
+- **Sin route segment configs.** El grep de `dynamic`/`revalidate`/`fetchCache`/`runtime` da 0 y el build marca `/activar-cuenta` como ◐ PPR. Correcto.
+
+### Criterios de aceptación (38/40 PASS)
+
+Evidencia runtime con Playwright sobre dev `:3000`, viewport 1440×900 salvo donde se indique.
+
+| # | Criterio | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `npm run build` sin errores ni rutas nuevas | PASS | exit 0, 8/8, mismas 6 rutas |
+| 2 | `npx tsc --noEmit` sin errores | PASS | exit 0 |
+| 3 | `npx eslint app` sin errores | PASS | exit 0 |
+| 4 | `"use client"` en exactamente 8 archivos | FAIL | 12 archivos (ver nota ①) |
+| 5 | `server-only` + `new Resend(` dentro de una función | PASS | `resend.ts:1` y `:33` |
+| 6 | Enums con los labels en orden | PASS | `father,mother,guardian` / `pending,accepted,expired,cancelled` |
+| 7 | RLS activo, 14 y 5 columnas | PASS | `relrowsecurity = true` en ambas |
+| 8 | `anon` sin `select` | PASS | `false` en `invitations` y `parent_children` |
+| 9 | Grants de `authenticated` | PASS | insert true en `invitations`, false en `parent_children` |
+| 10 | Índice único parcial | PASS | `indexdef` con `WHERE status = 'pending'` |
+| 11 | Funciones y grants | PASS | ver tabla de comandos |
+| 12 | Preview de código inexistente | PASS | `'ZZZZZ' → not_found` |
+| 13 | Crear niño y abrir su perfil | PASS | "Verificación Once" creado desde `/ninos`, perfil en `/ninos/585ac51a…` con heading correcto (luego borrado) |
+| 14 | Panel del modal | PASS | "CÓDIGO DE INVITACIÓN", "Se genera al enviar" (20px), "Vence en 7 días"; sin código real |
+| 15 | Envío cierra y muestra PENDIENTE | PASS | modal `open=false`; tarjeta "Diego Fernández · Papá · invitación enviada · PENDIENTE" |
+| 16 | Fila nueva con formato correcto | PASS | `QA3U9`, `pending`, `father`, email en minúsculas, `7.00` días, `sent_at` no nulo |
+| 17 | El correo llega a la bandeja | BLOCKED | Resend aceptó el envío (`sent_at`), pero no hay bandeja accesible: los destinatarios de prueba no tienen inbox (ver nota ②) |
+| 18 | Reinvitar cancela la anterior | PASS | `QA3U9 → cancelled`, `YUSPC → pending`, un solo pendiente |
+| 19 | Email con cuenta bloqueado | PASS | alerta inline, `dialogOpen=true`, 0 filas para ese email, sin llamada a Resend |
+| 20 | `RESEND_API_KEY` inválida | PASS | `401 API key is invalid`; alerta inline; fila `PB9AD` `pending` con `sent_at = null`; modal abierto |
+| 21 | Reintento reutiliza id/code | PASS | mismo `015e7609…`/`PB9AD`, `sent_at` escrito, sin fila nueva |
+| 22 | Sin `?code=` | PASS | "Necesitás el enlace que te llegó por correo." + link a `/login` |
+| 23 | Código inexistente | PASS | `ZZZZZ` → 200 y "No encontramos esa invitación." |
+| 24 | Vencida + oculta de la tarjeta | PASS | `QA3U9` con `expires_at` pasado → "Esa invitación venció…"; la tarjeta solo mostró el padre activo |
+| 25 | Cancelada y usada | PASS | `YUSPC` → "fue cancelada"; `PB9AD` → "ya fue usada" |
+| 26 | Formulario válido | PASS | "Harly · Sala Soles", código y email `readOnly`, sin campo de nombre |
+| 27 | Contraseña de 7 | PASS | mensaje exacto y foco en `activation-password` |
+| 28 | Consentimiento sin marcar | PASS | mensaje exacto y foco en `photo-consent` |
+| 29 | Activación exitosa | PASS | redirect a `/`, sidebar "Diego Retry · Familia", heading "Buenas, Diego" |
+| 30 | Filas creadas por la activación | PASS | `users` parent/active/daycare, `parent_children` mother, invitación `accepted`, `photo_consent = true` |
+| 31 | Reabrir el enlace usado | PASS | "Esa invitación ya fue usada…" |
+| 32 | Reinvitar al email activado | PASS | alerta de cuenta existente, modal abierto, sin filas nuevas |
+| 33 | Padre sin niños ajenos | PASS | 0 tarjetas, 0 errores; estado vacío provisto por la corrección 1 |
+| 34 | Consola sin errores ni warnings | PASS | 0 errores y 0 warnings en el modal, `/ninos/[id]` y los cinco estados de `/activar-cuenta` |
+| 35 | Sin imports de `references/` y mocks borrados | PASS | grep 0; `_data/auth.ts` y `_data/parent-invite.ts` no existen |
+| 36 | `.env.template` y key no expuesta | PASS | `RESEND_FROM_EMAIL` y `NEXT_PUBLIC_APP_URL`; las 10 coincidencias de `re_` son `daycare_id` |
+| 37 | 390px sin desborde | PASS | `scrollWidth 380 ≤ 390`, `scrollHeight > 600` |
+| 38 | Capturas y comparación visual | PASS | 4 capturas + modal y mocks; ver nota ③ |
+| 39 | Identificadores en inglés | PASS | símbolos nuevos: `InvitationPreview`, `normalizeInvitationCode`, `generateInvitationCode`, `getParentsForChildren`, `sendInvitationEmail`, `buildInvitationEmailHtml`, `inviteParent`, `activateAccount`, `ActivationForm`, `InvitationNotice`, `RELATIONSHIP_LABELS`, `current_staff_daycare_id` |
+| 40 | Sin `any`, `@ts-ignore`, `style={{}}` ni hex en JSX | PASS | 0 coincidencias; los hex viven en el string HTML del correo |
+
+### Notas de la corrida
+
+① **Criterio 4 obsoleto, no defecto de código.** La spec se escribió contra el inventario de SPEC 05 (6 archivos con `"use client"`), pero después SPEC 06 sumó `post-form`, `post-composer-provider`, `post-composer-trigger` y `modal-dialog`, y SPEC 09 sumó `login-form`. Hoy hay 12 y esta spec no agregó ninguno fuera de `auth/activation-form.tsx`. Propuesta de reemplazo, pendiente de aprobación: *"`"use client"` aparece en `auth/activation-form.tsx` y `children/parent-invite-form.tsx`, y en ningún módulo de servidor (`_lib/**`, `actions.ts`, `email/resend.ts`)."*
+
+② **Criterio 17 requiere una bandeja real.** Los envíos de esta corrida fueron a `delivered@resend.dev` y `visual@resend.dev`: Resend los acepta (por eso `sent_at` queda escrito) pero son direcciones de prueba sin inbox. Con el remitente `onboarding@resend.dev` Resend solo entrega al email de la cuenta (`kevin07cv2008@gmail.com`), que ya es usuario y por diseño no se puede invitar. Para cerrarlo: verificar un dominio en Resend, invitar una dirección real nueva y confirmar la recepción a mano.
+
+③ **Un solo delta visual esperado en cada pantalla.** Modal vs `vincular-padre.dc.html`: el panel dice "Se genera al enviar" en lugar de `7K4P9` (decisión de la spec) y el campo de nombre tiene borde de foco al abrir. `/activar-cuenta` vs su mock: código y email van con fondo crema y texto muted por ser `readOnly` (decisión de la spec). Layout, tipografía, colores, radios y espaciados coinciden.
+
+### Artefactos (en `.playwright-mcp/`, gitignored)
+
+- `invite-pending-1440.png` — tarjeta con el padre pendiente.
+- `invite-modal-1440.png` — modal abierto para comparar con el mock.
+- `activate-form-1440.png` — formulario con código válido.
+- `activate-form-390.png` — el mismo a 390×600.
+- `activate-expired-1440.png` — estado vencido.
+- `mock-vincular-padre-1440.png` y `mock-activar-cuenta-1440.png` — mocks servidos en `127.0.0.1:8971` para la comparación.
+
+### Archivos modificados en esta corrida
+
+- `app/(app)/ninos/page.tsx`: estado vacío cuando no hay grupos.
+- `app/_components/auth/activation-form.tsx`: `highlighted` en la contraseña.
+- `specs/11-invitacion-de-padres-con-resend-y-registro.md`: 38 casillas + este reporte.
+
+No se tocó `references/`, `proxy.ts`, `package.json`, la configuración de lint ni de build. No se hizo commit ni push.
+
+### Pendientes y riesgos
+
+- **Criterio 4:** esperando aprobación del reemplazo de texto (nota ①).
+- **Criterio 17:** verificación manual con una bandeja real (nota ②).
+- La base quedó limpia: 0 invitaciones, 0 vínculos, 1 usuario y 1 niño; el niño de prueba y la cuenta de prueba se borraron.
+- `await connection()` dentro de `ActivationContent` no está en la spec original pero es obligatorio con PPR: sin él el build falla con `Date.now()` inestable. Está comentado en el código.
+- Con todo en PASS (salvo los dos puntos de arriba) corresponde pasar `**Status:**` a `Implementado` después de resolver el criterio 4 y el 17. El cambio de estado lo hace el usuario.
