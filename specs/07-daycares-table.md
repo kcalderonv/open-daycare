@@ -139,21 +139,21 @@ Reglas que quedan fijadas para todas las tablas siguientes:
 
 ## Acceptance criteria
 
-- [ ] `list_tables({ schemas: ["public"], verbose: true })` incluye `daycares` con 13 columnas y PK en `id`.
-- [ ] `list_migrations` incluye `create_daycares` y `seed_daycares_demo` además de las dos de prueba.
-- [ ] Existe `supabase/migrations/<version>_create_daycares.sql` y su `<version>` coincide con la de `list_migrations`.
-- [ ] Existe `supabase/migrations/<version>_seed_daycares_demo.sql` y su `<version>` coincide con la de `list_migrations`.
-- [ ] `select count(*) from public.daycares` devuelve `1`.
-- [ ] La fila del seed tiene `slug = 'sala-soles'`, `country = 'PE'`, `timezone = 'America/Lima'`, `locale = 'es-PE'` y `status = 'active'`.
-- [ ] `pg_class.relrowsecurity` es `true` para `public.daycares`.
-- [ ] `information_schema.role_table_grants` no devuelve filas de `anon` ni `authenticated` para `daycares`.
-- [ ] `pg_constraint` contiene `daycares_slug_key`, `daycares_status`, `daycares_country_code` y `daycares_slug_format`.
-- [ ] Existe el trigger `daycares_set_updated_at` y la función `public.set_updated_at()`.
-- [ ] Reaplicar el `insert` del seed a mano no crea una segunda fila (`on conflict (slug) do nothing`).
-- [ ] `supabase/README.md` documenta las 8 reglas del patrón.
-- [ ] `.env.template` contiene `SUPABASE_DB_PASSWORD` y ya no `SUPBASE_DB_PASSWORD`.
-- [ ] `npx tsc --noEmit` termina sin errores.
-- [ ] `app/` no tiene archivos modificados por esta spec.
+- [x] `list_tables({ schemas: ["public"], verbose: true })` incluye `daycares` con 13 columnas y PK en `id`.
+- [x] `list_migrations` incluye `create_daycares` y `seed_daycares_demo` además de las dos de prueba.
+- [x] Existe `supabase/migrations/<version>_create_daycares.sql` y su `<version>` coincide con la de `list_migrations`.
+- [x] Existe `supabase/migrations/<version>_seed_daycares_demo.sql` y su `<version>` coincide con la de `list_migrations`.
+- [x] `select count(*) from public.daycares` devuelve `1`.
+- [x] La fila del seed tiene `slug = 'sala-soles'`, `country = 'PE'`, `timezone = 'America/Lima'`, `locale = 'es-PE'` y `status = 'active'`.
+- [x] `pg_class.relrowsecurity` es `true` para `public.daycares`.
+- [x] `information_schema.role_table_grants` no devuelve filas de `anon` ni `authenticated` para `daycares`.
+- [x] `pg_constraint` contiene `daycares_slug_key`, `daycares_status`, `daycares_country_code` y `daycares_slug_format`.
+- [x] Existe el trigger `daycares_set_updated_at` y la función `public.set_updated_at()`.
+- [x] Reaplicar el `insert` del seed a mano no crea una segunda fila (`on conflict (slug) do nothing`).
+- [x] `supabase/README.md` documenta las 8 reglas del patrón.
+- [x] `.env.template` contiene `SUPABASE_DB_PASSWORD` y ya no `SUPBASE_DB_PASSWORD`.
+- [x] `npx tsc --noEmit` termina sin errores.
+- [x] `app/` no tiene archivos modificados por esta spec.
 
 ## Decisions
 
@@ -191,3 +191,70 @@ Reglas que quedan fijadas para todas las tablas siguientes:
 - CLI local, Docker o `config.toml`.
 
 Cada uno de esos, si llega, va en su propia spec.
+
+## Verification report
+
+- **Fecha de corrida:** 2026-10-26 19:36 -05:00 (los `version` de migración están en UTC y por eso figuran `20261027...`)
+- **Branch:** `spec-07-daycares-table` (HEAD `5d477b5 07-daycares-tables`)
+- **Punto de partida:** árbol limpio, todo el trabajo de la spec ya commiteado. No hizo falta corregir código en esta corrida.
+
+### Comandos ejecutados
+
+| Comando | Resultado |
+| --- | --- |
+| `npm run build` | exit 0. `✓ Compiled successfully in 20.6s`, `Finished TypeScript in 5.9s`, 16 páginas generadas, `ƒ Proxy (Middleware)`. |
+| `npx tsc --noEmit` | exit 0, sin salida de errores. |
+| `npx eslint app` | exit 0, sin errores ni warnings. |
+| `git diff --name-only main...HEAD` | 5 archivos: `.env.template`, `specs/07-daycares-table.md`, `supabase/README.md` y las 2 migraciones. Ninguno en `app/`. |
+| `grep -E '\b(dynamic\|revalidate\|fetchCache\|runtime)\s*[=:]'` en `app/**.{ts,tsx}` | sin coincidencias. |
+| `glob **/postcss.config.*`, `**/tailwind.config.*` | sin coincidencias fuera de `node_modules`. |
+
+### Criterios
+
+| # | Criterio | Estado | Evidencia |
+| --- | --- | --- | --- |
+| 1 | `list_tables` incluye `daycares` con 13 columnas y PK en `id` | PASS | MCP devolvió 13 columnas en orden (`id, name, slug, email, phone, address, city, country, timezone, locale, status, created_at, updated_at`), `primary_keys: ["id"]`, `rls_enabled: true`. |
+| 2 | `list_migrations` incluye `create_daycares` y `seed_daycares_demo` | PASS | 4 entradas: `20261027000639 create_test_table`, `20261027000755 drop_test_table`, `20261027002052 create_daycares`, `20261027002121 seed_daycares_demo`. |
+| 3 | Archivo `<version>_create_daycares.sql` coincide con `list_migrations` | PASS | `supabase/migrations/20261027002052_create_daycares.sql` (44 líneas). |
+| 4 | Archivo `<version>_seed_daycares_demo.sql` coincide con `list_migrations` | PASS | `supabase/migrations/20261027002121_seed_daycares_demo.sql` (4 líneas). |
+| 5 | `select count(*)` devuelve `1` | PASS | `[{"total":1}]`. |
+| 6 | Fila del seed con `slug/country/timezone/locale/status` | PASS | `Sala Soles / sala-soles / PE / America/Lima / es-PE / active`. |
+| 7 | `pg_class.relrowsecurity` es `true` | PASS | `[{"relrowsecurity":true}]`. |
+| 8 | Sin filas de `anon`/`authenticated` en `role_table_grants` | PASS | 14 filas, solo `postgres` y `service_role` (DELETE, INSERT, REFERENCES, SELECT, TRIGGER, TRUNCATE, UPDATE). |
+| 9 | `pg_constraint` con los 4 nombres | PASS | 9 constraints: `daycares_pkey`, `daycares_slug_key`, `daycares_country_code`, `daycares_email_format`, `daycares_locale`, `daycares_name_length`, `daycares_slug_format`, `daycares_status`, `daycares_timezone`. |
+| 10 | Trigger `daycares_set_updated_at` y función `public.set_updated_at()` | PASS | `pg_trigger` unido a `pg_proc`: `[{"tgname":"daycares_set_updated_at","proname":"set_updated_at"}]`, función en esquema `public`. |
+| 11 | Reaplicar el insert no crea una segunda fila | PASS | `count` antes `1`, insert `ON CONFLICT` ejecutado, `count` después `1`. |
+| 12 | `supabase/README.md` documenta las 8 reglas | PASS | Reglas 1–8 presentes y textualmente iguales al apartado *Patrón de migraciones* de esta spec. |
+| 13 | `.env.template` con `SUPABASE_DB_PASSWORD` | PASS | Contenido: `SUPABASE_DB_PASSWORD=xxxxxxxxxxxxxx`; búsqueda de `SUPBASE_DB_PASSWORD` → `False`. |
+| 14 | `npx tsc --noEmit` sin errores | PASS | exit 0. |
+| 15 | `app/` sin archivos modificados | PASS | `git diff --name-only main...HEAD -- app next.config.ts package.json package-lock.json tsconfig.json eslint.config.mjs proxy.ts` → vacío. |
+
+### Contraste con documentación
+
+- **Next.js (Context7 `/vercel/next.js` + doc vendorizada `node_modules/next/dist/docs/01-app/02-guides/environment-variables.md`):** las variables sin prefijo `NEXT_PUBLIC_` solo existen en el servidor ("Non-`NEXT_PUBLIC_` environment variables are only available in the Node.js environment"). `SUPABASE_DB_PASSWORD` no se expone al navegador, así que el rename de `.env.template` no filtra el secreto.
+- **Next.js / repo (`AGENTS.md`):** no se agregaron route configs (`dynamic`, `revalidate`, `fetchCache`, `runtime`), ni `postcss.config.*`, ni `tailwind.config.*`, ni dependencias nuevas. `cacheComponents` + `partialPrefetching` siguen intactos y el build los reporta activos.
+- **Supabase (skill local + Context7 `/supabase/supabase`):** patrón de cerrar una tabla con `alter table ... enable row level security` + `revoke all ... from anon, authenticated` en la misma migración, tal como indica `docs/content/guides/database/postgres/row-level-security.mdx`. No hay policies todavía, que es la decisión de esta spec.
+
+### Playwright
+
+Esta spec no tiene criterios visuales ni de DOM, así que la pasada fue un smoke de regresión para confirmar que agregar `supabase/` no rompió la app, que sigue con mocks.
+
+- `http://localhost:3000/` → 200, `scrollWidth` 1440 = `innerWidth` 1440 (sin scroll horizontal).
+- `http://localhost:3000/ninos` → 200, consola: 0 errores, 0 warnings.
+- Capturas: `.playwright-mcp/verify-spec07-feed-1440.png`, `.playwright-mcp/verify-spec07-ninos-1440.png`.
+- `verify-spec07-feed-1440.png` contra `references/screenshots/feed.png`: sin diferencias de layout, jerarquía, colores, tipografía ni copy. La referencia está recortada a 904px de ancho, así que la comparación es de estructura, no pixel a pixel.
+- En la primera carga de `/` apareció un error de hidratación de React; ver *Pendientes*.
+
+### Archivos modificados en esta corrida
+
+- `specs/07-daycares-table.md`: casillas marcadas y esta sección agregada.
+- Nada en `app/`, `supabase/`, `.env.template` ni configuración: no hubo fallas que corregir.
+
+### Pendientes y riesgos
+
+- **Dev server colgado:** al empezar, el `next dev` que estaba en el puerto 3000 (PID 12528, 1.2 GB) aceptaba conexiones TCP pero no respondía HTTP ni a los 60 s. Hubo que matarlo y levantar uno nuevo. No es un criterio de esta spec, pero es una falla real de la herramienta.
+- **Error de hidratación en `/` y `/ninos`:** React reporta `style={{caret-color:"transparent"}}` de más en cada `input`/`textarea`. `caret-color` no aparece en ningún archivo de `app/` y el HTML del servidor (`Invoke-WebRequest` sobre `/`, 59 486 bytes) tampoco lo contiene, pero el DOM del navegador sí lo tenía al hidratar. Firma típica de una extensión que muta los campos antes de que React cargue, que es justamente una de las causas que lista el propio mensaje de React. Queda como observación ambiental, no como deuda de la SPEC 07: si querés descartarlo del todo, hay que abrir `/` en un perfil limpio de Chrome y ver si el error desaparece.
+- **`.env` local mantiene el typo:** tiene `SUPBASE_DB_PASSWORD`, no `SUPABASE_DB_PASSWORD`. El alcance de la spec solo nombraba `.env.template`, así que no falla ningún criterio; conviene corregirlo antes de la spec que conecte la app a Supabase.
+- **Criterio 11 escribe en la base:** para probar idempotencia se reaplicó el insert del seed por MCP. Fue inocuo por el `on conflict`, pero deja una escritura en el historial de la corrida.
+- **No hay `config.toml`:** si mañana se adopta la CLI, `supabase migration list` puede reportar las 2 migraciones de prueba (`create_test_table`, `drop_test_table`) que nunca tuvieron archivo en el repo. Habría que decidir si se reviran o se documentan como excepción.
+- **La tabla sigue inalcanzable desde el frontend:** es la decisión tomada. La spec de auth trae policies y grants.
