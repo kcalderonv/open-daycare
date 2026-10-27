@@ -11,6 +11,7 @@ export function ConsentCheckbox({ label }: { label: string }) {
       <input
         type="checkbox"
         name="photo-consent"
+        required
         checked={checked}
         aria-checked={checked}
         onChange={(event) => setChecked(event.target.checked)}

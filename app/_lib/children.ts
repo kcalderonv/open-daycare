@@ -2,6 +2,19 @@ export type ChildTone = "sky" | "rose" | "sage" | "sun" | "lilac";
 
 export type ParentRelationship = "mother" | "father" | "guardian";
 
+export const RELATIONSHIP_LABELS: Record<ParentRelationship, string> = {
+  mother: "Mamá",
+  father: "Papá",
+  guardian: "Tutor/a",
+};
+
+export const RELATIONSHIP_OPTIONS: ParentRelationship[] = [
+  "mother",
+  "father",
+  "guardian",
+];
+
+
 export type ParentStatus = "active" | "pending";
 
 export type Parent = {
@@ -202,16 +215,24 @@ export function getChildTag(child: Child): ChildTag | null {
   return null;
 }
 
-export function parentsSummary(count: number): string {
-  if (count === 0) {
-    return "sin padres vinculados";
+export function parentsSummary(parents: Parent[]): string {
+  const active = parents.filter((parent) => parent.status === "active").length;
+  const pending = parents.length - active;
+  const activeLabel =
+    active === 0
+      ? "sin padres vinculados"
+      : active === 1
+        ? "1 padre vinculado"
+        : `${active} padres vinculados`;
+
+  if (pending === 0) {
+    return activeLabel;
   }
 
-  if (count === 1) {
-    return "1 padre vinculado";
-  }
+  const pendingLabel =
+    pending === 1 ? "1 padre invitado" : `${pending} padres invitados`;
 
-  return `${count} padres vinculados`;
+  return active === 0 ? pendingLabel : `${activeLabel} · ${pendingLabel}`;
 }
 
 export function groupChildrenByRoom(

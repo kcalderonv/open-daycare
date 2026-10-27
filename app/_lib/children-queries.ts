@@ -10,8 +10,10 @@ import {
   toInputDate,
   toneForId,
   type Child,
+  type Parent,
   type Room,
 } from "@/app/_lib/children";
+import { getParentsForChildren } from "@/app/_lib/invitation-queries";
 
 type ChildRow = Database["public"]["Tables"]["children"]["Row"];
 type RoomRow = Database["public"]["Tables"]["rooms"]["Row"];
@@ -25,7 +27,11 @@ function toRoom(row: Pick<RoomRow, "id" | "name" | "slug" | "position">): Room {
   };
 }
 
-function toChild(row: ChildRow, roomName: string | null): Child {
+function toChild(
+  row: ChildRow,
+  roomName: string | null,
+  parents: Parent[],
+): Child {
   const firstName = row.full_name.split(/\s+/)[0] ?? row.full_name;
   const initial = firstName.charAt(0).toUpperCase();
 
@@ -50,7 +56,7 @@ function toChild(row: ChildRow, roomName: string | null): Child {
     })),
     medicalNotes: row.medical_notes,
     status: row.status,
-    parents: [],
+    parents,
   };
 }
 
@@ -86,10 +92,16 @@ export async function getChildren(daycareId: string): Promise<Child[]> {
     throw new Error(error.message);
   }
 
+  const rows = data ?? [];
   const roomNames = new Map(rooms.map((room) => [room.id, room.name]));
+  const parents = await getParentsForChildren(rows.map((row) => row.id));
 
-  return (data ?? []).map((row) =>
-    toChild(row, row.room_id ? (roomNames.get(row.room_id) ?? null) : null),
+  return rows.map((row) =>
+    toChild(
+      row,
+      row.room_id ? (roomNames.get(row.room_id) ?? null) : null,
+      parents.get(row.id) ?? [],
+    ),
   );
 }
 
@@ -114,10 +126,13 @@ export async function getChild(
     return null;
   }
 
-  const rooms = await getRooms(daycareId);
+  const [rooms, parents] = await Promise.all([
+    getRooms(daycareId),
+    getParentsForChildren([data.id]),
+  ]);
   const roomName = data.room_id
     ? (rooms.find((room) => room.id === data.room_id)?.name ?? null)
     : null;
 
-  return toChild(data, roomName);
+  return toChild(data, roomName, parents.get(data.id) ?? []);
 }

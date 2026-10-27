@@ -23,7 +23,7 @@ export function ChildCard({ child }: { child: Child }) {
           {child.fullName}
         </div>
         <div className="text-[13px] text-muted-soft">
-          {child.ageLabel} · {parentsSummary(child.parents.length)}
+          {child.ageLabel} · {parentsSummary(child.parents)}
         </div>
       </div>
 

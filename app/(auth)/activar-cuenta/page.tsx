@@ -1,17 +1,30 @@
 import type { Metadata } from "next";
-import { AuthField } from "@/app/_components/auth/auth-field";
-import { AuthFooter } from "@/app/_components/auth/auth-footer";
+import Link from "next/link";
+import { connection } from "next/server";
+import { Suspense } from "react";
+import { ActivationForm } from "@/app/_components/auth/activation-form";
 import { AuthLogo } from "@/app/_components/auth/auth-logo";
-import { AuthSubmit } from "@/app/_components/auth/auth-submit";
-import { ConsentCheckbox } from "@/app/_components/auth/consent-checkbox";
-import { InviteSummary } from "@/app/_components/auth/invite-summary";
-import { invite } from "@/app/_data/auth";
+import { getInvitationPreview } from "@/app/_lib/invitation-queries";
+import {
+  normalizeInvitationCode,
+  type InvitationStatus,
+} from "@/app/_lib/invitations";
 
 export const metadata: Metadata = {
   title: "Activar cuenta · OpenDayCare",
 };
 
-export default function ActivateAccountPage() {
+const STATUS_COPY: Record<Exclude<InvitationStatus, "pending">, string> = {
+  not_found: "No encontramos esa invitación.",
+  expired: "Esa invitación venció. Pedile a la guardería que te envíe una nueva.",
+  accepted: "Esa invitación ya fue usada. Iniciá sesión para entrar.",
+  cancelled:
+    "Esa invitación fue cancelada. Pedile a la guardería que te envíe una nueva.",
+};
+
+export default function ActivateAccountPage({
+  searchParams,
+}: PageProps<"/activar-cuenta">) {
   return (
     <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
       <div className="w-full max-w-[440px]">
@@ -25,50 +38,61 @@ export default function ActivateAccountPage() {
           activar la cuenta.
         </p>
 
-        <InviteSummary />
-
-        <AuthField
-          id="activation-code"
-          label="CÓDIGO DE INVITACIÓN"
-          name="invitationCode"
-          variant="code"
-          autoComplete="off"
-          defaultValue={invite.invitationCode}
-          className="mb-[18px]"
-        />
-
-        <AuthField
-          id="activation-email"
-          label="EMAIL"
-          name="email"
-          type="email"
-          autoComplete="email"
-          defaultValue={invite.email}
-          className="mb-[18px]"
-        />
-
-        <AuthField
-          id="activation-password"
-          label="CREAR CONTRASEÑA"
-          name="password"
-          variant="password"
-          autoComplete="new-password"
-          defaultValue="contraseña"
-          highlighted
-          className="mb-[18px]"
-        />
-
-        <ConsentCheckbox label="Autorizo a la guardería a tomar y compartir fotos de mi hijo dentro de la app." />
-
-        <AuthSubmit href="/">Activar mi cuenta</AuthSubmit>
-
-        <AuthFooter
-          text="¿Ya tenés cuenta?"
-          linkLabel="Iniciar sesión"
-          href="/login"
-          className="mt-[22px]"
-        />
+        <Suspense fallback={<div className="h-[420px]" />}>
+          <ActivationContent searchParams={searchParams} />
+        </Suspense>
       </div>
+    </div>
+  );
+}
+
+async function ActivationContent({
+  searchParams,
+}: {
+  searchParams: PageProps<"/activar-cuenta">["searchParams"];
+}) {
+  // Supabase resolves session expiry with Date.now(); deferring to request
+  // time keeps that read out of the prerender pass, same as getCurrentUser.
+  await connection();
+
+  const { code: rawCode } = await searchParams;
+  const code = normalizeInvitationCode(
+    typeof rawCode === "string" ? rawCode : "",
+  );
+
+  if (code === "") {
+    return (
+      <InvitationNotice message="Necesitás el enlace que te llegó por correo." />
+    );
+  }
+
+  let preview;
+
+  try {
+    preview = await getInvitationPreview(code);
+  } catch {
+    return (
+      <InvitationNotice message="No pudimos verificar la invitación. Recargá la página." />
+    );
+  }
+
+  if (preview.status !== "pending") {
+    return <InvitationNotice message={STATUS_COPY[preview.status]} />;
+  }
+
+  return <ActivationForm code={code} preview={preview} />;
+}
+
+function InvitationNotice({ message }: { message: string }) {
+  return (
+    <div className="rounded-2xl border-[1.5px] border-auth-input-border bg-white px-5 py-6 text-center">
+      <p className="text-[15px] font-bold leading-[1.5] text-ink">{message}</p>
+      <Link
+        href="/login"
+        className="mt-4 inline-block text-[13.5px] font-bold text-coral-link"
+      >
+        Ir a iniciar sesión
+      </Link>
     </div>
   );
 }
