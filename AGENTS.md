@@ -45,10 +45,10 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Spec-driven development
 
 - Vendored skills: `.agents/skills/spec/SKILL.md` (designs a spec, writes no code) and `.agents/skills/spec-impl/SKILL.md` (implements an approved spec); versions are pinned in `skills-lock.json`.
-- Specs go to `specs/NN-slug.md`; the folder does not exist yet, so start at `01-`. Use `.agents/skills/spec/template.md`.
+- Specs live under `specs/`. **Database specs** (tables, enums, migrations, seeds, RLS, grants or anything applied to Supabase) go to `specs/database/NN-slug.md`. Every other spec goes to `specs/NN-slug.md`. Numbering is global: take the highest `NN` in either location and add one. This path rule overrides the default in the vendored skill. Use `.agents/skills/spec/template.md`.
 - Status flow is `Draft` → `Approved` (humans make this change) → `Implemented`. `spec-impl` refuses to run on anything but Approved.
 - Implementation happens on branch `spec-NN-slug`; `specs/.spec-config.yml` controls `AutoCreateBranch` (default `true`). The workflow never commits for you — commit only when explicitly asked.
-- Verification: `.opencode/agents/spec-verifier.md` is a project agent (Qwen3.8 Flash, vision) that checks a spec's Acceptance criteria with `build`/`tsc`/`eslint`, Context7 and Playwright, fixes failures, and ticks the boxes with evidence. Run `/verify-spec specs/NN-slug.md`.
+- Verification: `.opencode/agents/spec-verifier.md` is a project agent (Qwen3.8 Flash, vision) that checks a spec's Acceptance criteria with `build`/`tsc`/`eslint`, Context7 and Playwright, fixes failures, and ticks the boxes with evidence. Run `/verify-spec <path-to-spec>` (e.g. `specs/database/08-users-table-y-enums.md`).
 
 ## MCPS
 
@@ -58,6 +58,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 ## Spec Driven Development - Skill
 - /spec Usaremos esta habilidad para crear las especificaciones.
 - /spec-impl Usaremos esta skill para hacer las implementaciones.
+- Toda especificación relacionada con la base de datos (tablas, enums, migraciones, seeds, RLS, grants, Supabase) va en `specs/database/`. El resto va en `specs/`. La numeración es global entre ambas carpetas.
 
 ## Reglas de código
 - Usar código limpio, nombre, funciones, vaiables en ingles.
