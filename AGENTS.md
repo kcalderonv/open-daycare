@@ -55,13 +55,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Playwright MCP is configured in `opencode.json`. Put every screenshot, trace, and artifact under `.playwright-mcp/` (gitignored). Use it to compare the running app against `references/screenshots/`.
 - Use the Context7 MCP for current framework documentation instead of relying on training data.
 
+## Agents
+
+Project agents live in `.opencode/agents/` and run as subagents (all on `opencode-go/deepseek-v4.1-flash`). They share the same rules: speak Spanish, audit and report before touching code, never commit or push, never edit `references/`, `.agents/`, `AGENTS.md` or `.env*`, and put every Playwright artifact in `.playwright-mcp/`.
+
+| Agent | What it does | Invoke with |
+| --- | --- | --- |
+| `accessibility-checker` | Audits WCAG 2.2 AA on the files or folders you name: landmarks and heading order, accessible names, measured contrast (4.5:1 text / 3:1 large and UI), keyboard and visible focus, form errors and announcements, modals, reflow, zoom, text spacing and the 2.2 criteria. Verifies in the browser with axe-core plus Playwright. Audits by default; fixes only when asked. | `/accessibility-checker app/(auth)/login/page.tsx` |
+| `react-best-practices` | Reviews React 19 / Next.js 16 code against Context7 and the bundled `node_modules/next/dist/docs/`, reports each finding with its doc citation, then applies the minimal high/medium-severity fix. No restyling, no "modernizing", no mass renames. | `/react-best-practices app/_components/auth/**` |
+| `spec-verifier` | Walks a spec's Acceptance criteria one by one with `build` / `tsc` / `eslint`, Context7 and Playwright (DOM measurements plus visual comparison against `references/screenshots/`), fixes what blocks them, and ticks only the verified boxes with a `Verification report` section. | `/verify-spec specs/database/08-users-table-y-enums.md` |
+| `db-migrator` | Owns schema changes: inventories `supabase/migrations/` against the real Supabase project, reports drift versus `specs/database/`, writes and applies migrations through the Supabase MCP, verifies constraints / RLS / grants and regenerates `utils/supabase/database.types.ts`. Never touches `app/` or `specs/`. | No slash command: ask for it directly (`spec 10`, `children`, "apply the schema") |
+
 ## Spec-driven development
 
 - Vendored skills: `.agents/skills/spec/SKILL.md` (designs a spec, writes no code) and `.agents/skills/spec-impl/SKILL.md` (implements an approved spec); versions are pinned in `skills-lock.json`.
 - Specs live under `specs/`. **Database specs** (tables, enums, migrations, seeds, RLS, grants or anything applied to Supabase) go to `specs/database/NN-slug.md`. Every other spec goes to `specs/NN-slug.md`. Numbering is global: take the highest `NN` in either location and add one. This path rule overrides the default in the vendored skill. Use `.agents/skills/spec/template.md`.
 - Status flow is `Draft` → `Approved` (humans make this change) → `Implemented`. `spec-impl` refuses to run on anything but Approved.
 - Implementation happens on branch `spec-NN-slug`; `specs/.spec-config.yml` controls `AutoCreateBranch` (default `true`). The workflow never commits for you — commit only when explicitly asked.
-- Verification: `.opencode/agents/spec-verifier.md` is a project agent (Qwen3.8 Flash, vision) that checks a spec's Acceptance criteria with `build`/`tsc`/`eslint`, Context7 and Playwright, fixes failures, and ticks the boxes with evidence. Run `/verify-spec <path-to-spec>` (e.g. `specs/database/08-users-table-y-enums.md`).
+- Verification: `/verify-spec <path-to-spec>` runs the `spec-verifier` agent (see [Agents](#agents)), which checks a spec's Acceptance criteria, fixes failures and ticks the boxes with evidence — e.g. `specs/database/08-users-table-y-enums.md`.
 
 ## MCPS
 
