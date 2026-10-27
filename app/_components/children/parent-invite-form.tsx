@@ -112,14 +112,18 @@ export function ParentInviteForm({ child }: { child: Child }) {
     startTransition(async () => {
       const result = await inviteParent(child.id, data);
 
-      if (!result.ok) {
-        setSubmitError(result.error);
-        return;
-      }
+      // State updates after `await` only stay inside the Transition when they
+      // are wrapped again (react.dev, useTransition > Troubleshooting).
+      startTransition(() => {
+        if (!result.ok) {
+          setSubmitError(result.error);
+          return;
+        }
 
-      setSubmitError(null);
-      closeDialog();
-      router.refresh();
+        setSubmitError(null);
+        closeDialog();
+        router.refresh();
+      });
     });
   }
 
@@ -130,9 +134,9 @@ export function ParentInviteForm({ child }: { child: Child }) {
       return;
     }
 
-    const field = target.name as InviteField;
+    const field = FIELD_ORDER.find((candidate) => candidate === target.name);
 
-    if (!errors[field]) {
+    if (!field || !errors[field]) {
       return;
     }
 

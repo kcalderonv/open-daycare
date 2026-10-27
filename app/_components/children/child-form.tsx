@@ -188,14 +188,18 @@ export function ChildForm({ mode, child, rooms }: ChildFormProps) {
         ? await updateChild(child.id, data)
         : await createChild(data);
 
-      if (!result.ok) {
-        setSubmitError(result.error);
-        return;
-      }
+      // State updates after `await` only stay inside the Transition when they
+      // are wrapped again (react.dev, useTransition > Troubleshooting).
+      startTransition(() => {
+        if (!result.ok) {
+          setSubmitError(result.error);
+          return;
+        }
 
-      setSubmitError(null);
-      closeDialog();
-      router.refresh();
+        setSubmitError(null);
+        closeDialog();
+        router.refresh();
+      });
     });
   }
 
@@ -209,9 +213,9 @@ export function ChildForm({ mode, child, rooms }: ChildFormProps) {
       return;
     }
 
-    const field = target.name as ChildField;
+    const field = FIELD_ORDER.find((candidate) => candidate === target.name);
 
-    if (!errors[field]) {
+    if (!field || !errors[field]) {
       return;
     }
 
