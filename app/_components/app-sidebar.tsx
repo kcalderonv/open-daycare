@@ -1,11 +1,20 @@
 import Link from "next/link";
+import { signOut } from "@/app/(app)/actions";
 import { AppSidebarNav } from "@/app/_components/app-sidebar-nav";
 import { Brand } from "@/app/_components/brand";
 import { PostComposerTrigger } from "@/app/_components/feed/post-composer-trigger";
 import { LogOutIcon, PlusIcon } from "@/app/_components/icons";
-import { currentUser } from "@/app/_data/feed";
+import type { CurrentUser, UserRole } from "@/app/_lib/auth";
 
-export function AppSidebar() {
+const ROLE_LABELS: Record<UserRole, string> = {
+  admin: "Administración",
+  staff: "Maestro/a",
+  parent: "Familia",
+};
+
+export function AppSidebar({ user }: { user: CurrentUser }) {
+  const initial = user.fullName.trim().charAt(0).toUpperCase();
+
   return (
     <aside className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface px-4 py-6 shell:flex">
       <Link href="#" className="flex items-center gap-[11px] px-2 pb-[22px] pt-1">
@@ -22,19 +31,24 @@ export function AppSidebar() {
       <div className="mt-[10px] border-t border-border pt-[14px]">
         <div className="flex items-center gap-[11px] px-2 py-1.5">
           <div className="flex size-[38px] flex-none items-center justify-center rounded-full bg-coral font-display text-base font-semibold text-white">
-            {currentUser.initial}
+            {initial}
           </div>
           <div className="min-w-0 flex-1">
-            <div className="text-sm font-extrabold text-ink">{currentUser.name}</div>
-            <div className="text-xs text-muted-soft">{currentUser.role}</div>
+            <div className="text-sm font-extrabold text-ink">
+              {user.fullName}
+            </div>
+            <div className="text-xs text-muted-soft">{ROLE_LABELS[user.role]}</div>
           </div>
-          <Link
-            href="/login"
-            title="Cerrar sesión"
-            className="flex size-8 flex-none items-center justify-center rounded-[10px] bg-cream text-muted"
-          >
-            <LogOutIcon width={16} height={16} />
-          </Link>
+          <form action={signOut}>
+            <button
+              type="submit"
+              title="Cerrar sesión"
+              aria-label="Cerrar sesión"
+              className="flex size-8 flex-none cursor-pointer items-center justify-center rounded-[10px] bg-cream text-muted"
+            >
+              <LogOutIcon width={16} height={16} />
+            </button>
+          </form>
         </div>
       </div>
     </aside>

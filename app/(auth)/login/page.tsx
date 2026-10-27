@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { AuthField } from "@/app/_components/auth/auth-field";
+import { Suspense } from "react";
 import { AuthFooter } from "@/app/_components/auth/auth-footer";
-import { AuthSubmit } from "@/app/_components/auth/auth-submit";
+import { LoginForm } from "@/app/_components/auth/login-form";
 import { LoginHero } from "@/app/_components/auth/login-hero";
+import { resolveNextPath } from "@/app/_lib/next-path";
 
 export const metadata: Metadata = {
   title: "Iniciar sesión · OpenDayCare",
 };
 
-export default function LoginPage() {
+export default function LoginPage({ searchParams }: PageProps<"/login">) {
   return (
     <div className="grid flex-1 lg:grid-cols-[1.05fr_1fr]">
       <LoginHero />
@@ -23,36 +23,9 @@ export default function LoginPage() {
             Ingresá para ver el día de hoy.
           </p>
 
-          <AuthField
-            id="login-email"
-            label="EMAIL"
-            name="email"
-            type="email"
-            autoComplete="email"
-            defaultValue="caro@opendaycare.com"
-            className="mb-[18px]"
-          />
-
-          <AuthField
-            id="login-password"
-            label="CONTRASEÑA"
-            name="password"
-            variant="password"
-            autoComplete="current-password"
-            placeholder="••••••••"
-            className="mb-2.5"
-          />
-
-          <div className="mb-5 text-right">
-            <Link
-              href="#"
-              className="text-[13.5px] font-bold text-coral-link"
-            >
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </div>
-
-          <AuthSubmit href="/">Iniciar sesión</AuthSubmit>
+          <Suspense fallback={<LoginForm nextPath="/" accountError={false} />}>
+            <LoginFormWithParams searchParams={searchParams} />
+          </Suspense>
 
           <AuthFooter
             text="¿Te invitó la guardería?"
@@ -63,5 +36,20 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+async function LoginFormWithParams({
+  searchParams,
+}: {
+  searchParams: PageProps<"/login">["searchParams"];
+}) {
+  const { next, error } = await searchParams;
+
+  return (
+    <LoginForm
+      nextPath={resolveNextPath(typeof next === "string" ? next : null)}
+      accountError={error === "no-account"}
+    />
   );
 }

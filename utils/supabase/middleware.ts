@@ -1,17 +1,19 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import type { Database } from "@/utils/supabase/database.types";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
 
 /**
  * Refreshes the Supabase session for the incoming request and returns the
- * response that carries the rotated auth cookies. Called from `proxy.ts`.
+ * response that carries the rotated auth cookies, together with the verified
+ * claims that callers use for optimistic route protection.
  */
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabase = createServerClient(supabaseUrl, supabaseKey, {
+  const supabase = createServerClient<Database>(supabaseUrl, supabaseKey, {
     cookies: {
       getAll() {
         return request.cookies.getAll();
@@ -35,7 +37,7 @@ export async function updateSession(request: NextRequest) {
 
   // Resolving the claims is what triggers the refresh, and it has to happen
   // here: Server Components cannot write the rotated cookies themselves.
-  await supabase.auth.getClaims();
+  const { data } = await supabase.auth.getClaims();
 
-  return response;
+  return { response, claims: data?.claims ?? null };
 }
