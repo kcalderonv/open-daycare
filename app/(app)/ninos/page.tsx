@@ -61,8 +61,22 @@ async function ChildrenPageContent() {
         ) : null}
       </header>
 
-      {failed ? <ChildrenLoadError /> : <ChildrenSearch groups={groups} />}
+      {failed ? (
+        <ChildrenLoadError />
+      ) : groups.length === 0 ? (
+        <ChildrenEmpty />
+      ) : (
+        <ChildrenSearch groups={groups} />
+      )}
     </>
+  );
+}
+
+function ChildrenEmpty() {
+  return (
+    <p className="rounded-[18px] border border-dashed border-border bg-surface px-6 py-10 text-center text-[14.5px] text-muted">
+      Todavía no hay niños para mostrar.
+    </p>
   );
 }
 

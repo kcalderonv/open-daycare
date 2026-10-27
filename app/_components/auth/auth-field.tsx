@@ -26,8 +26,11 @@ export function AuthField({
   className,
   ...inputProps
 }: AuthFieldProps) {
-  const { type = variant === "password" ? "password" : "text", ...rest } =
-    inputProps;
+  const {
+    type = variant === "password" ? "password" : "text",
+    readOnly = false,
+    ...rest
+  } = inputProps;
 
   return (
     <div className={className}>
@@ -42,7 +45,10 @@ export function AuthField({
         id={id}
         name={name}
         type={type}
-        className={`w-full rounded-[14px] border-[1.5px] bg-white px-4 py-3.5 text-ink outline-none focus:border-coral ${
+        readOnly={readOnly}
+        className={`w-full rounded-[14px] border-[1.5px] px-4 py-3.5 outline-none focus:border-coral ${
+          readOnly ? "bg-auth-bg text-muted" : "bg-white text-ink"
+        } ${
           highlighted ? "border-auth-input-active" : "border-auth-input-border"
         } ${VARIANT_STYLES[variant]}`}
       />

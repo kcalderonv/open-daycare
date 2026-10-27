@@ -1,15 +1,22 @@
 "use client";
 
-import { useState, type ChangeEvent, type FormEvent } from "react";
+import { useRouter } from "next/navigation";
+import {
+  useState,
+  useTransition,
+  type ChangeEvent,
+  type FormEvent,
+} from "react";
+import { inviteParent } from "@/app/(app)/ninos/invite-actions";
 import { CloseIcon, InfoIcon, SendIcon } from "@/app/_components/icons";
 import { useFormDialogClose } from "@/app/_components/ui/form-dialog";
 import { FormField } from "@/app/_components/ui/form-field";
-import type { Child } from "@/app/_lib/children";
 import {
-  defaultRelationship,
-  parentInvite,
-  relationshipOptions,
-} from "@/app/_data/parent-invite";
+  RELATIONSHIP_LABELS,
+  RELATIONSHIP_OPTIONS,
+  type Child,
+  type ParentRelationship,
+} from "@/app/_lib/children";
 
 type InviteField = "name" | "email";
 
@@ -19,6 +26,11 @@ const FIELD_ORDER: InviteField[] = ["name", "email"];
 
 const NAME_PATTERN = /^[\p{L}\s'’-]+$/u;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[A-Za-z]{2,}$/;
+
+const DEFAULT_RELATIONSHIP: ParentRelationship = "mother";
+const EXPIRES_LABEL = "Vence en 7 días";
+const ALERT_CLASSES =
+  "mb-4 rounded-xl bg-coral-soft px-4 py-3 text-[13.5px] font-bold text-error";
 
 function validateName(value: string): string | undefined {
   const name = value.trim();
@@ -63,10 +75,17 @@ const VALIDATORS: Record<InviteField, (value: string) => string | undefined> = {
 
 export function ParentInviteForm({ child }: { child: Child }) {
   const closeDialog = useFormDialogClose();
+  const router = useRouter();
   const [errors, setErrors] = useState<InviteErrors>({});
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [pending, startTransition] = useTransition();
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (pending) {
+      return;
+    }
 
     const data = new FormData(event.currentTarget);
     const nextErrors: InviteErrors = {};
@@ -90,7 +109,18 @@ export function ParentInviteForm({ child }: { child: Child }) {
       return;
     }
 
-    closeDialog();
+    startTransition(async () => {
+      const result = await inviteParent(child.id, data);
+
+      if (!result.ok) {
+        setSubmitError(result.error);
+        return;
+      }
+
+      setSubmitError(null);
+      closeDialog();
+      router.refresh();
+    });
   }
 
   function handleChange(event: ChangeEvent<HTMLFormElement>) {
@@ -112,13 +142,18 @@ export function ParentInviteForm({ child }: { child: Child }) {
     }));
   }
 
+  function handleReset() {
+    setErrors({});
+    setSubmitError(null);
+  }
+
   return (
     <form
       noValidate
       autoComplete="off"
       onSubmit={handleSubmit}
       onChange={handleChange}
-      onReset={() => setErrors({})}
+      onReset={handleReset}
       className="max-h-[calc(100dvh-32px)] w-full max-w-[480px] overflow-y-auto rounded-3xl border border-border bg-auth-bg shadow-dialog"
     >
       <header className="flex items-center justify-between gap-3 border-b border-border px-[26px] py-5">
@@ -161,6 +196,7 @@ export function ParentInviteForm({ child }: { child: Child }) {
             name="name"
             placeholder="Ej. Diego Fernández"
             autoComplete="off"
+            disabled={pending}
             required
             error={errors.name}
           />
@@ -174,6 +210,7 @@ export function ParentInviteForm({ child }: { child: Child }) {
             type="email"
             placeholder="correo@ejemplo.com"
             autoComplete="off"
+            disabled={pending}
             required
             error={errors.email}
           />
@@ -184,17 +221,18 @@ export function ParentInviteForm({ child }: { child: Child }) {
             PARENTESCO
           </legend>
           <div className="flex gap-[9px]">
-            {relationshipOptions.map((option) => (
-              <label key={option.value} className="flex-1">
+            {RELATIONSHIP_OPTIONS.map((relationship) => (
+              <label key={relationship} className="flex-1">
                 <input
                   type="radio"
                   name="relationship"
-                  value={option.value}
-                  defaultChecked={option.value === defaultRelationship}
+                  value={relationship}
+                  defaultChecked={relationship === DEFAULT_RELATIONSHIP}
+                  disabled={pending}
                   className="peer sr-only"
                 />
-                <span className="block cursor-pointer rounded-[999px] border-[1.5px] border-border bg-surface p-[11px] text-center text-[14px] font-extrabold text-nav peer-checked:border-relationship-border peer-checked:bg-relationship-bg peer-checked:text-invite-blue peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2">
-                  {option.label}
+                <span className="block cursor-pointer rounded-[999px] border-[1.5px] border-border bg-surface p-[11px] text-center text-[14px] font-extrabold text-nav peer-checked:border-relationship-border peer-checked:bg-relationship-bg peer-checked:text-invite-blue peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2 peer-disabled:cursor-wait peer-disabled:opacity-60">
+                  {RELATIONSHIP_LABELS[relationship]}
                 </span>
               </label>
             ))}
@@ -205,20 +243,27 @@ export function ParentInviteForm({ child }: { child: Child }) {
           <div className="mb-2 text-[12px] font-extrabold tracking-[.7px] text-invite-code-label">
             CÓDIGO DE INVITACIÓN
           </div>
-          <div className="font-display text-[34px] font-semibold tracking-[7px] text-consent-fg">
-            {parentInvite.code}
+          <div className="font-display text-[20px] font-semibold text-consent-fg">
+            Se genera al enviar
           </div>
           <div className="mt-1.5 text-[13px] text-invite-code-label">
-            {parentInvite.expiresLabel}
+            {EXPIRES_LABEL}
           </div>
         </div>
 
+        {submitError ? (
+          <p role="alert" className={ALERT_CLASSES}>
+            {submitError}
+          </p>
+        ) : null}
+
         <button
           type="submit"
-          className="flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] px-[14px] py-[14px] text-[15.5px] font-extrabold text-white shadow-auth-cta focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+          disabled={pending}
+          className="flex w-full cursor-pointer items-center justify-center gap-[9px] rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] px-[14px] py-[14px] text-[15.5px] font-extrabold text-white shadow-auth-cta focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"
         >
           <SendIcon width={19} height={19} />
-          Enviar invitación
+          {pending ? "Enviando…" : "Enviar invitación"}
         </button>
       </div>
     </form>

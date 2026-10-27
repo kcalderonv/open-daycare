@@ -101,6 +101,31 @@ select has_table_privilege('authenticated', 'public.children', 'insert') as pued
        has_table_privilege('anon', 'public.children', 'select') as anon_lee;
 ```
 
+## Invitaciones y vínculo de padres
+
+- `public.invitations` guarda la invitación con su código de 5 caracteres (alfabeto sin `0/O/1/I/L`, ~28M combinaciones), vigencia de 7 días y `sent_at` como marca de entrega a Resend.
+- Una sola invitación pendiente por niño y email: el índice único parcial `invitations_pending_child_email_key` cubre `(child_id, lower(email)) where status = 'pending'`. Como `now()` no es inmutable, la app normaliza las vencidas antes de insertar.
+- `public.parent_children` es el vínculo real. Lo crea `accept_invitation`, no la app: `authenticated` no tiene `insert` sobre la tabla.
+- El tramo anónimo usa `get_invitation_preview(code)` (`security definer`, grant a `anon`). `accept_invitation(code)` exige sesión y valida que el email del JWT coincida con el de la invitación.
+- `email_has_account(email)` es de staff y evita invitar a un email que ya tiene cuenta.
+- La app sigue sin usar `service_role`: el alta del padre es `signUp` con la sesión anónima y el vínculo lo hace la función definer.
+- **Requisito de Auth:** "Confirm email" desactivado (Authentication → Sign In / Providers → Email). Sin eso `signUp` no devuelve sesión y la activación termina en el mensaje genérico.
+- **Resend:** `RESEND_API_KEY` y `RESEND_FROM_EMAIL`. Con `onboarding@resend.dev` solo se entrega al email de la cuenta de Resend; para cualquier destinatario hay que verificar un dominio.
+
+```sql
+-- Invitaciones de un niño
+select code, email, status, expires_at, sent_at
+from public.invitations
+where child_id = '<uuid>'
+order by created_at desc;
+
+-- Vínculos reales
+select u.full_name, pc.relationship, pc.created_at
+from public.parent_children pc
+join public.users u on u.id = pc.parent_id
+where pc.child_id = '<uuid>';
+```
+
 ## Comprobaciones útiles
 
 ```sql
