@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/app/_lib/auth";
-import { sendInvitationEmail } from "@/app/_lib/email/resend";
+import { sendInvitationEmail } from "@/app/_lib/email/invitation";
 import { generateInvitationCode } from "@/app/_lib/invitations";
 import { getSiteUrl } from "@/app/_lib/site-url";
 import type { Database } from "@/utils/supabase/database.types";
