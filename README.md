@@ -5,7 +5,7 @@ Aplicación de gestión para guarderías: autenticación, feed de publicaciones,
 - **Framework:** Next.js 16 (App Router, PPR con `cacheComponents`)
 - **UI:** React 19 + Tailwind CSS 4
 - **Backend:** Supabase (Auth + Postgres con RLS)
-- **Emails:** Resend (solo invitaciones)
+- **Emails:** Resend o Mailtrap Sandbox en desarrollo, SMTP propio en producción (solo invitaciones)
 
 ---
 
@@ -52,8 +52,9 @@ Completá los valores:
 | `NEXT_PUBLIC_SUPABASE_URL` | Sí | Supabase Dashboard → Project Settings → Data API → Project URL |
 | `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` | Sí | Supabase Dashboard → Project Settings → API Keys → publishable key (`sb_publishable_...`) |
 | `NEXT_PUBLIC_APP_URL` | Recomendada | `http://localhost:3000` en desarrollo; se usa para el enlace de activación |
-| `RESEND_API_KEY` | No | [Resend](https://resend.com/api-keys). Sin ella la app levanta, pero no envía invitaciones |
-| `RESEND_FROM_EMAIL` | No | Remitente verificado en Resend. `onboarding@resend.dev` solo entrega al email de la cuenta |
+| `EMAIL_PROVIDER` | No | `resend` (default), `mailtrap` o `smtp`. En producción solo se acepta `smtp`. Ver [Correo](#correo-resend-mailtrap-y-smtp) |
+| `EMAIL_FROM` | Según proveedor | Remitente visible. Obligatorio con `mailtrap` y `smtp`; con `resend` cae a `onboarding@resend.dev` |
+| `RESEND_API_KEY` | No | [Resend](https://resend.com/api-keys). Sin ella la app levanta, pero no envía invitaciones por Resend |
 | `SUPABASE_DB_PASSWORD` | No | Solo para comandos de CLI que se conectan a la base. La app no la lee |
 
 Notas:
@@ -92,6 +93,39 @@ Para probar el build de producción:
 npm run build
 npm start
 ```
+
+---
+
+## Correo: Resend, Mailtrap y SMTP
+
+El proveedor se elige con `EMAIL_PROVIDER` y se resuelve en cada envío, nunca al importar el módulo. Todas las variables son server-only: ninguna lleva prefijo `NEXT_PUBLIC_`.
+
+| Entorno | `EMAIL_PROVIDER` | Credenciales que se usan |
+| --- | --- | --- |
+| Desarrollo | `resend` (default si falta) | `RESEND_API_KEY` |
+| Desarrollo | `mailtrap` | `MAILTRAP_HOST`, `MAILTRAP_PORT`, `MAILTRAP_USER`, `MAILTRAP_PASSWORD` |
+| Desarrollo | `smtp` | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` |
+| Producción | `smtp` (obligatorio) | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD` |
+
+- En producción se rechazan `resend` y `mailtrap`: el envío falla con un error de configuración en el log y el usuario ve el mensaje genérico del modal. Un `mailtrap` olvidado en un deploy capturaría los correos en vez de entregarlos.
+- `EMAIL_FROM` es obligatorio con `mailtrap` y `smtp`. Con `resend` se usa `OpenDayCare <onboarding@resend.dev>` cuando falta.
+- `secure` no se configura: el puerto 465 usa TLS directo y el resto STARTTLS.
+- En `smtp`, `SMTP_USER` y `SMTP_PASSWORD` son opcionales, pero siempre en par. Ambos vacíos habilitan la conexión anónima a un Postfix local en `127.0.0.1:25`.
+- `RESEND_FROM_EMAIL` ya no se usa: si sigue en `.env.local` y falta `EMAIL_FROM`, la app avisa en el log y lo ignora. Renombrala a `EMAIL_FROM`.
+
+### Mailtrap Sandbox en desarrollo
+
+1. Entrá al inbox de pruebas en [Mailtrap](https://mailtrap.io) y abrí **Settings → SMTP Settings**.
+2. Copiá host, puerto, usuario y contraseña a `MAILTRAP_HOST`, `MAILTRAP_PORT`, `MAILTRAP_USER` y `MAILTRAP_PASSWORD`.
+3. Poné `EMAIL_PROVIDER=mailtrap` y un `EMAIL_FROM` cualquiera (el sandbox no valida el dominio).
+4. Enviá una invitación desde `/ninos`: el correo aparece en el inbox de Mailtrap, no en una bandeja real.
+
+### SMTP propio en producción
+
+1. Configurá `EMAIL_PROVIDER=smtp`, `SMTP_HOST`, `SMTP_PORT` y `EMAIL_FROM` con un remitente del dominio.
+2. Si el servidor exige autenticación, completá `SMTP_USER` y `SMTP_PASSWORD`.
+3. El servidor SMTP necesita SPF, DKIM y PTR correctos para no caer en spam; eso se configura fuera de la app.
+4. El envío tiene un timeout de 10 segundos y no reintenta solo. Si falla, el modal muestra el error y se puede reintentar con el mismo código.
 
 ---
 
