@@ -12,19 +12,31 @@ const ROLE_LABELS: Record<UserRole, string> = {
   parent: "Familia",
 };
 
-export function AppSidebar({ user }: { user: CurrentUser }) {
+type AppSidebarProps = {
+  user: CurrentUser;
+  daycareName: string;
+  canPublish: boolean;
+};
+
+export function AppSidebar({
+  user,
+  daycareName,
+  canPublish,
+}: AppSidebarProps) {
   const initial = user.fullName.trim().charAt(0).toUpperCase();
 
   return (
     <aside className="sticky top-0 hidden h-dvh w-[248px] flex-none flex-col border-r border-border bg-surface px-4 py-6 shell:flex">
       <Link href="#" className="flex items-center gap-[11px] px-2 pb-[22px] pt-1">
-        <Brand />
+        <Brand subtitle={daycareName} />
       </Link>
 
-      <PostComposerTrigger className="mb-[18px] flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] p-3 text-[14.5px] font-extrabold text-white shadow-cta focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2">
-        <PlusIcon width={17} height={17} />
-        Nueva publicación
-      </PostComposerTrigger>
+      {canPublish ? (
+        <PostComposerTrigger className="mb-[18px] flex w-full cursor-pointer items-center justify-center gap-2 rounded-[14px] bg-[linear-gradient(180deg,var(--color-cta-from),var(--color-cta-to))] p-3 text-[14.5px] font-extrabold text-white shadow-cta focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2">
+          <PlusIcon width={17} height={17} />
+          Nueva publicación
+        </PostComposerTrigger>
+      ) : null}
 
       <AppSidebarNav />
 

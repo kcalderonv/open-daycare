@@ -20,6 +20,7 @@ export type ModalDialogHandle = {
 type ModalDialogProps = {
   titleId: string;
   initialFocusId?: string;
+  preventClose?: boolean;
   onClose?: () => void;
   children: ReactNode;
   ref?: Ref<ModalDialogHandle>;
@@ -28,6 +29,7 @@ type ModalDialogProps = {
 export function ModalDialog({
   titleId,
   initialFocusId,
+  preventClose = false,
   onClose,
   children,
   ref,
@@ -75,6 +77,10 @@ export function ModalDialog({
   useImperativeHandle(ref, () => ({ open: openDialog, close: closeDialog }));
 
   function handleBackdropClick(event: MouseEvent<HTMLDivElement>) {
+    if (preventClose) {
+      return;
+    }
+
     if (event.target === event.currentTarget) {
       closeDialog();
     }
@@ -115,6 +121,11 @@ export function ModalDialog({
       ref={dialogRef}
       aria-labelledby={titleId}
       onClose={handleClose}
+      onCancel={(event) => {
+        if (preventClose) {
+          event.preventDefault();
+        }
+      }}
       onKeyDown={handleKeyDown}
       className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-hidden bg-transparent p-0 backdrop:bg-ink/45"
     >
