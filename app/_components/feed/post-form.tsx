@@ -7,18 +7,28 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
+import { useRouter } from "next/navigation";
+import {
+  createPost,
+  type CreatePostPhotoInput,
+} from "@/app/(app)/posts/actions";
 import { ChildAvatar } from "@/app/_components/children/child-avatar";
 import { CloseIcon, PlusIcon } from "@/app/_components/icons";
-import { FormTextArea } from "@/app/_components/ui/form-field";
-import { feedAudience } from "@/app/_data/feed-audience";
+import { FormSelect, FormTextArea } from "@/app/_components/ui/form-field";
 import {
   audienceChipId,
   descriptionLimits,
   photoRules,
-  postTypes,
+  postPhotoBucket,
   wholeRoomLabel,
-  type PostTypeId,
 } from "@/app/_data/post-composer";
+import { postTypes, type PostType } from "@/app/_data/post-types";
+import {
+  defaultRoomId,
+  type ComposerAudience,
+  type ComposerChild,
+} from "@/app/_lib/posts";
+import { createClient } from "@/utils/supabase/client";
 
 type AudienceState = {
   wholeRoom: boolean;
@@ -29,80 +39,147 @@ type PostField = "audience" | "postType" | "description";
 
 type PostErrors = Partial<Record<PostField | "photos", string>>;
 
-type SelectedPhoto = { id: string; name: string; url: string };
+type SelectedPhoto = {
+  id: string;
+  file: File;
+  url: string;
+};
+
+type ReencodedPhoto = {
+  blob: Blob;
+  contentType: string;
+  extension: string;
+  width: number;
+  height: number;
+};
 
 const FIELD_ORDER: PostField[] = ["audience", "postType", "description"];
 
 const FOCUS_TARGETS: Record<PostField, string> = {
-  audience: audienceChipId(feedAudience[0].id),
-  postType: `post-type-${postTypes[0].id}`,
+  audience: "post-room",
+  postType: "post-type-meal",
   description: "post-description",
 };
 
 const AUDIENCE_MESSAGE = "Elegí al menos un destinatario.";
+const ROOM_EMPTY_MESSAGE = "Esta sala no tiene niños.";
 const POST_TYPE_MESSAGE = "Elegí un tipo de publicación.";
 const DESCRIPTION_EMPTY_MESSAGE = "Contá cómo le fue hoy.";
-const DESCRIPTION_MIN_MESSAGE = "La descripción debe tener al menos 10 caracteres.";
-const DESCRIPTION_MAX_MESSAGE = "La descripción no puede superar los 600 caracteres.";
+const DESCRIPTION_MIN_MESSAGE =
+  "La descripción debe tener al menos 10 caracteres.";
+const DESCRIPTION_MAX_MESSAGE =
+  "La descripción no puede superar los 600 caracteres.";
 const PHOTO_TYPE_MESSAGE = "Solo podés subir imágenes JPG, PNG o WebP.";
 const PHOTO_SIZE_MESSAGE = "Cada foto debe pesar menos de 5 MB.";
 const PHOTO_MAX_MESSAGE = "Podés agregar hasta 4 fotos.";
+const PHOTO_UPLOAD_MESSAGE = "No pudimos subir las fotos. Intentá de nuevo.";
 
 const SECTION_LABEL =
   "mb-[10px] block text-[12px] font-extrabold tracking-[.7px] text-muted";
 const ERROR_CLASS = "mt-2 text-[12.5px] font-bold text-error";
 const HEADER_ACTION =
-  "cursor-pointer text-[15px] focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2";
+  "cursor-pointer text-[15px] focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 const CHIP_BASE =
   "flex cursor-pointer items-center gap-2 rounded-full border-[1.5px] py-1.5 text-sm font-bold";
 const CHIP_IDLE =
   "border-border bg-surface text-nav peer-checked:border-ink peer-checked:bg-ink peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2";
 
-function resolvedAudienceIds(selection: AudienceState): string[] {
+function resolvedAudienceIds(
+  selection: AudienceState,
+  roomChildren: ComposerChild[],
+): string[] {
   return selection.wholeRoom
-    ? feedAudience.map((child) => child.id)
+    ? roomChildren.map((child) => child.id)
     : selection.childIds;
 }
 
-function validateAudience(selection: AudienceState): string | undefined {
-  return resolvedAudienceIds(selection).length === 0
-    ? AUDIENCE_MESSAGE
-    : undefined;
+function canvasToBlob(
+  canvas: HTMLCanvasElement,
+  type: string,
+  quality: number,
+): Promise<Blob | null> {
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob), type, quality);
+  });
 }
 
-function validatePostType(postType: PostTypeId | null): string | undefined {
-  return postType ? undefined : POST_TYPE_MESSAGE;
+async function reencodePhoto(file: File): Promise<ReencodedPhoto> {
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(
+    1,
+    photoRules.maxDimension / Math.max(bitmap.width, bitmap.height),
+  );
+  const width = Math.max(1, Math.round(bitmap.width * scale));
+  const height = Math.max(1, Math.round(bitmap.height * scale));
+  const canvas = document.createElement("canvas");
+
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    bitmap.close();
+    throw new Error("canvas-unavailable");
+  }
+
+  context.drawImage(bitmap, 0, 0, width, height);
+  bitmap.close();
+
+  const webp = await canvasToBlob(canvas, photoRules.outputType, photoRules.quality);
+
+  if (webp) {
+    return {
+      blob: webp,
+      contentType: "image/webp",
+      extension: "webp",
+      width,
+      height,
+    };
+  }
+
+  const jpeg = await canvasToBlob(canvas, "image/jpeg", photoRules.quality);
+
+  if (!jpeg) {
+    throw new Error("encode-failed");
+  }
+
+  return {
+    blob: jpeg,
+    contentType: "image/jpeg",
+    extension: "jpg",
+    width,
+    height,
+  };
 }
 
-function validateDescription(value: string): string | undefined {
-  const description = value.trim();
+type PostFormProps = {
+  audience: ComposerAudience;
+  user: { id: string; daycareId: string };
+  pending: boolean;
+  onPendingChange: (value: boolean) => void;
+  onClose: () => void;
+};
 
-  if (description === "") {
-    return DESCRIPTION_EMPTY_MESSAGE;
-  }
-
-  if (description.length < descriptionLimits.min) {
-    return DESCRIPTION_MIN_MESSAGE;
-  }
-
-  if (description.length > descriptionLimits.max) {
-    return DESCRIPTION_MAX_MESSAGE;
-  }
-
-  return undefined;
-}
-
-type PostFormProps = { onClose: () => void };
-
-export function PostForm({ onClose }: PostFormProps) {
-  const [audience, setAudience] = useState<AudienceState>({
+export function PostForm({
+  audience,
+  user,
+  pending,
+  onPendingChange,
+  onClose,
+}: PostFormProps) {
+  const router = useRouter();
+  const [roomId, setRoomId] = useState(() => defaultRoomId(audience));
+  const [selection, setSelection] = useState<AudienceState>({
     wholeRoom: false,
     childIds: [],
   });
-  const [postType, setPostType] = useState<PostTypeId | null>(null);
+  const [postType, setPostType] = useState<PostType | null>(null);
   const [description, setDescription] = useState("");
   const [photos, setPhotos] = useState<SelectedPhoto[]>([]);
   const [errors, setErrors] = useState<PostErrors>({});
+  const [formError, setFormError] = useState<string | null>(null);
+  const [uploadedCount, setUploadedCount] = useState(0);
 
   const objectUrls = useRef<string[]>([]);
 
@@ -114,8 +191,23 @@ export function PostForm({ onClose }: PostFormProps) {
     };
   }, []);
 
-  function updateAudience(next: AudienceState) {
-    setAudience(next);
+  const roomChildren = audience.children.filter(
+    (child) => child.roomId === roomId,
+  );
+  const selectedIds = resolvedAudienceIds(selection, roomChildren);
+  const blockedChild =
+    photos.length > 0
+      ? roomChildren.find(
+          (child) => selectedIds.includes(child.id) && !child.photoConsent,
+        )
+      : undefined;
+  const consentMessage = blockedChild
+    ? `${blockedChild.firstName} no tiene consentimiento de fotos. Sacá las fotos o cambialo de destinatarios.`
+    : undefined;
+  const photosError = consentMessage ?? errors.photos;
+
+  function updateSelection(next: AudienceState) {
+    setSelection(next);
     setErrors((current) =>
       current.audience
         ? { ...current, audience: validateAudience(next) }
@@ -123,31 +215,77 @@ export function PostForm({ onClose }: PostFormProps) {
     );
   }
 
+  function validateAudience(next: AudienceState): string | undefined {
+    if (roomChildren.length === 0) {
+      return ROOM_EMPTY_MESSAGE;
+    }
+
+    return resolvedAudienceIds(next, roomChildren).length === 0
+      ? AUDIENCE_MESSAGE
+      : undefined;
+  }
+
+  function validatePostType(value: PostType | null): string | undefined {
+    return value ? undefined : POST_TYPE_MESSAGE;
+  }
+
+  function validateDescription(value: string): string | undefined {
+    const text = value.trim();
+
+    if (text === "") {
+      return DESCRIPTION_EMPTY_MESSAGE;
+    }
+
+    if (text.length < descriptionLimits.min) {
+      return DESCRIPTION_MIN_MESSAGE;
+    }
+
+    if (text.length > descriptionLimits.max) {
+      return DESCRIPTION_MAX_MESSAGE;
+    }
+
+    return undefined;
+  }
+
+  function chooseRoom(nextRoomId: string) {
+    setRoomId(nextRoomId);
+    setSelection({ wholeRoom: false, childIds: [] });
+    setErrors((current) => ({
+      ...current,
+      audience: undefined,
+      photos: undefined,
+    }));
+  }
+
   function toggleWholeRoom() {
-    updateAudience(
-      audience.wholeRoom
+    if (roomChildren.length === 0) {
+      return;
+    }
+
+    updateSelection(
+      selection.wholeRoom
         ? { wholeRoom: false, childIds: [] }
         : { wholeRoom: true, childIds: [] },
     );
   }
 
   function toggleChild(childId: string) {
-    if (audience.wholeRoom) {
-      updateAudience({ wholeRoom: false, childIds: [childId] });
+    if (selection.wholeRoom) {
+      updateSelection({ wholeRoom: false, childIds: [childId] });
       return;
     }
 
-    const isSelected = audience.childIds.includes(childId);
+    const isSelected = selection.childIds.includes(childId);
 
-    updateAudience({
+    updateSelection({
       wholeRoom: false,
       childIds: isSelected
-        ? audience.childIds.filter((id) => id !== childId)
-        : [...audience.childIds, childId],
+        ? selection.childIds.filter((id) => id !== childId)
+        : [...selection.childIds, childId],
     });
   }
 
-  function choosePostType(next: PostTypeId) {
+  function choosePostType(next: PostType) {
     setPostType(next);
     setErrors((current) =>
       current.postType ? { ...current, postType: undefined } : current,
@@ -198,7 +336,7 @@ export function PostForm({ onClose }: PostFormProps) {
       const url = URL.createObjectURL(file);
 
       objectUrls.current.push(url);
-      accepted.push({ id: crypto.randomUUID(), name: file.name, url });
+      accepted.push({ id: crypto.randomUUID(), file, url });
     }
 
     if (accepted.length > 0) {
@@ -214,27 +352,105 @@ export function PostForm({ onClose }: PostFormProps) {
     setPhotos((current) => current.filter((item) => item.id !== photo.id));
   }
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (pending) {
+      return;
+    }
+
     const nextErrors: PostErrors = {
-      audience: validateAudience(audience),
+      audience: validateAudience(selection),
       postType: validatePostType(postType),
       description: validateDescription(description),
     };
 
-    setErrors((current) => ({ ...current, ...nextErrors }));
+    setErrors(nextErrors);
 
     const firstInvalid = FIELD_ORDER.find((field) => nextErrors[field]);
 
     if (firstInvalid) {
+      const target =
+        firstInvalid === "audience" && roomChildren[0]
+          ? audienceChipId(roomChildren[0].id)
+          : FOCUS_TARGETS[firstInvalid];
+
       event.currentTarget
-        .querySelector<HTMLElement>(`#${FOCUS_TARGETS[firstInvalid]}`)
+        .querySelector<HTMLElement>(`#${target}`)
         ?.focus();
       return;
     }
 
-    onClose();
+    if (!postType) {
+      return;
+    }
+
+    if (consentMessage) {
+      setErrors((current) => ({ ...current, photos: consentMessage }));
+      event.currentTarget
+        .querySelector<HTMLElement>("#post-photos")
+        ?.focus();
+      return;
+    }
+
+    setFormError(null);
+    setUploadedCount(0);
+    onPendingChange(true);
+
+    const supabase = createClient();
+    const uploaded: CreatePostPhotoInput[] = [];
+
+    try {
+      for (const photo of photos) {
+        const processed = await reencodePhoto(photo.file);
+        const path = `${user.daycareId}/${user.id}/${crypto.randomUUID()}.${processed.extension}`;
+        const { error } = await supabase.storage
+          .from(postPhotoBucket)
+          .upload(path, processed.blob, {
+            contentType: processed.contentType,
+            upsert: false,
+          });
+
+        if (error) {
+          throw new Error("upload-failed");
+        }
+
+        uploaded.push({
+          path,
+          width: processed.width,
+          height: processed.height,
+        });
+        setUploadedCount(uploaded.length);
+      }
+
+      const result = await createPost({
+        type: postType,
+        roomId,
+        roomWide: selection.wholeRoom,
+        body: description.trim(),
+        childIds: selectedIds,
+        photos: uploaded,
+      });
+
+      if (!result.ok) {
+        setFormError(result.error);
+        onPendingChange(false);
+        return;
+      }
+
+      onPendingChange(false);
+      onClose();
+      router.refresh();
+    } catch {
+      if (uploaded.length > 0) {
+        await supabase.storage
+          .from(postPhotoBucket)
+          .remove(uploaded.map((photo) => photo.path));
+      }
+
+      setFormError(PHOTO_UPLOAD_MESSAGE);
+      onPendingChange(false);
+    }
   }
 
   const descriptionCountClassName =
@@ -242,10 +458,18 @@ export function PostForm({ onClose }: PostFormProps) {
       ? "text-[12px] font-extrabold text-error"
       : "text-[12px] font-extrabold text-muted";
 
+  const submitLabel =
+    pending && photos.length > 0 && uploadedCount < photos.length
+      ? "Subiendo…"
+      : pending
+        ? "Publicando…"
+        : "Publicar";
+
   return (
     <form
       noValidate
       autoComplete="off"
+      aria-busy={pending}
       onSubmit={handleSubmit}
       className="max-h-[calc(100dvh-32px)] w-full max-w-[580px] overflow-y-auto rounded-3xl border border-border bg-auth-bg shadow-dialog"
     >
@@ -253,6 +477,7 @@ export function PostForm({ onClose }: PostFormProps) {
         <button
           type="button"
           onClick={onClose}
+          disabled={pending}
           className={`${HEADER_ACTION} font-bold text-muted`}
         >
           Cancelar
@@ -265,13 +490,54 @@ export function PostForm({ onClose }: PostFormProps) {
         </h2>
         <button
           type="submit"
+          disabled={pending}
           className={`${HEADER_ACTION} font-extrabold text-eyebrow`}
         >
-          Publicar
+          {submitLabel}
         </button>
       </header>
 
       <div className="px-[26px] py-6">
+        {formError ? (
+          <p
+            role="alert"
+            className="mb-4 rounded-xl bg-error/10 px-4 py-3 text-[13px] font-bold text-error"
+          >
+            {formError}
+          </p>
+        ) : null}
+
+        {pending ? (
+          <p
+            aria-live="polite"
+            className="mb-4 text-[12.5px] font-bold text-muted"
+          >
+            {photos.length > 0 && uploadedCount < photos.length
+              ? `Subiendo ${uploadedCount + 1} de ${photos.length}…`
+              : "Publicando…"}
+          </p>
+        ) : null}
+
+        <div className="mb-[22px]">
+          <FormSelect
+            id="post-room"
+            name="room"
+            label="SALA"
+            options={
+              audience.rooms.length > 0
+                ? audience.rooms.map((room) => ({
+                    value: room.id,
+                    label: room.name,
+                  }))
+                : [{ value: "", label: "Sin salas" }]
+            }
+            value={roomId}
+            disabled={pending}
+            onChange={(event) => chooseRoom(event.target.value)}
+            required
+          />
+        </div>
+
         <fieldset
           className="mb-[22px]"
           aria-required="true"
@@ -279,9 +545,9 @@ export function PostForm({ onClose }: PostFormProps) {
         >
           <legend className={SECTION_LABEL}>PARA</legend>
           <div className="flex flex-wrap gap-[9px]">
-            {feedAudience.map((child) => {
+            {roomChildren.map((child) => {
               const checked =
-                !audience.wholeRoom && audience.childIds.includes(child.id);
+                !selection.wholeRoom && selection.childIds.includes(child.id);
 
               return (
                 <label key={child.id}>
@@ -291,14 +557,13 @@ export function PostForm({ onClose }: PostFormProps) {
                     name="audience"
                     value={child.id}
                     checked={checked}
+                    disabled={pending}
                     onChange={() => toggleChild(child.id)}
                     className="peer sr-only"
                   />
-                  <span
-                    className={`${CHIP_BASE} ${CHIP_IDLE} pl-1.5 pr-3.5`}
-                  >
+                  <span className={`${CHIP_BASE} ${CHIP_IDLE} pl-1.5 pr-3.5`}>
                     <ChildAvatar
-                      initial={child.firstName.charAt(0)}
+                      initial={child.initial}
                       tone={child.tone}
                       size="xs"
                     />
@@ -314,15 +579,27 @@ export function PostForm({ onClose }: PostFormProps) {
                 id="post-audience-room"
                 name="audience"
                 value="room"
-                checked={audience.wholeRoom}
+                checked={selection.wholeRoom}
+                disabled={pending || roomChildren.length === 0}
                 onChange={toggleWholeRoom}
                 className="peer sr-only"
               />
-              <span className={`${CHIP_BASE} ${CHIP_IDLE} px-4`}>
+              <span
+                className={`${CHIP_BASE} ${CHIP_IDLE} px-4 ${
+                  roomChildren.length === 0 ? "opacity-50" : ""
+                }`}
+              >
                 {wholeRoomLabel}
               </span>
             </label>
           </div>
+
+          {roomChildren.length === 0 ? (
+            <p className="mt-2 text-[12.5px] font-bold text-muted">
+              {ROOM_EMPTY_MESSAGE}
+            </p>
+          ) : null}
+
           {errors.audience ? (
             <p id="post-audience-error" role="alert" className={ERROR_CLASS}>
               {errors.audience}
@@ -348,11 +625,14 @@ export function PostForm({ onClose }: PostFormProps) {
                     name="postType"
                     value={option.id}
                     checked={active}
+                    disabled={pending}
                     onChange={() => choosePostType(option.id)}
                     className="peer sr-only"
                   />
                   <span
-                    className={`block cursor-pointer rounded-full px-4 py-2 text-[13.5px] font-extrabold peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2 ${active ? option.activeClassName : option.idleClassName}`}
+                    className={`block cursor-pointer rounded-full px-4 py-2 text-[13.5px] font-extrabold peer-focus-visible:ring-2 peer-focus-visible:ring-coral peer-focus-visible:ring-offset-2 ${
+                      active ? option.activeClassName : option.idleClassName
+                    }`}
                   >
                     {option.label}
                   </span>
@@ -386,6 +666,7 @@ export function PostForm({ onClose }: PostFormProps) {
               </span>
             }
             className="min-h-[120px]"
+            disabled={pending}
             required
           />
         </div>
@@ -407,8 +688,9 @@ export function PostForm({ onClose }: PostFormProps) {
                 <button
                   type="button"
                   onClick={() => removePhoto(photo)}
+                  disabled={pending}
                   aria-label={`Quitar foto ${index + 1}`}
-                  className="absolute right-1 top-1 flex size-6 cursor-pointer items-center justify-center rounded-full bg-ink/70 text-white focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2"
+                  className="absolute right-1 top-1 flex size-6 cursor-pointer items-center justify-center rounded-full bg-ink/70 text-white focus-visible:ring-2 focus-visible:ring-coral focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <CloseIcon width={14} height={14} />
                 </button>
@@ -426,6 +708,7 @@ export function PostForm({ onClose }: PostFormProps) {
                   aria-label="Agregar fotos"
                   accept={photoRules.accept}
                   multiple
+                  disabled={pending}
                   onChange={handleFiles}
                   className="peer sr-only"
                 />
@@ -440,9 +723,9 @@ export function PostForm({ onClose }: PostFormProps) {
               </label>
             ) : null}
           </div>
-          {errors.photos ? (
+          {photosError ? (
             <p id="post-photos-error" role="alert" className={ERROR_CLASS}>
-              {errors.photos}
+              {photosError}
             </p>
           ) : null}
         </div>

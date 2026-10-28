@@ -234,6 +234,158 @@ export type Database = {
           },
         ]
       }
+      post_children: {
+        Row: {
+          child_id: string
+          daycare_id: string
+          post_id: string
+        }
+        Insert: {
+          child_id: string
+          daycare_id: string
+          post_id: string
+        }
+        Update: {
+          child_id?: string
+          daycare_id?: string
+          post_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_children_child_fkey"
+            columns: ["child_id"]
+            isOneToOne: false
+            referencedRelation: "children"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_children_daycare_fkey"
+            columns: ["daycare_id"]
+            isOneToOne: false
+            referencedRelation: "daycares"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_children_post_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      post_photos: {
+        Row: {
+          created_at: string
+          daycare_id: string
+          height: number | null
+          id: string
+          position: number
+          post_id: string
+          storage_path: string
+          width: number | null
+        }
+        Insert: {
+          created_at?: string
+          daycare_id: string
+          height?: number | null
+          id?: string
+          position: number
+          post_id: string
+          storage_path: string
+          width?: number | null
+        }
+        Update: {
+          created_at?: string
+          daycare_id?: string
+          height?: number | null
+          id?: string
+          position?: number
+          post_id?: string
+          storage_path?: string
+          width?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_photos_daycare_fkey"
+            columns: ["daycare_id"]
+            isOneToOne: false
+            referencedRelation: "daycares"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "post_photos_post_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      posts: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          daycare_id: string
+          id: string
+          published_at: string
+          room_id: string | null
+          room_wide: boolean
+          title: string | null
+          type: Database["public"]["Enums"]["post_type"]
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          daycare_id: string
+          id?: string
+          published_at?: string
+          room_id?: string | null
+          room_wide?: boolean
+          title?: string | null
+          type: Database["public"]["Enums"]["post_type"]
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          daycare_id?: string
+          id?: string
+          published_at?: string
+          room_id?: string | null
+          room_wide?: boolean
+          title?: string | null
+          type?: Database["public"]["Enums"]["post_type"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "posts_author_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_daycare_fkey"
+            columns: ["daycare_id"]
+            isOneToOne: false
+            referencedRelation: "daycares"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "posts_room_fkey"
+            columns: ["room_id"]
+            isOneToOne: false
+            referencedRelation: "rooms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       rooms: {
         Row: {
           created_at: string
@@ -322,7 +474,25 @@ export type Database = {
     }
     Functions: {
       accept_invitation: { Args: { p_code: string }; Returns: undefined }
+      create_post: {
+        Args: {
+          p_body: string
+          p_child_ids: string[]
+          p_photos: Json
+          p_room_id: string
+          p_room_wide: boolean
+          p_type: Database["public"]["Enums"]["post_type"]
+        }
+        Returns: string
+      }
       current_staff_daycare_id: { Args: never; Returns: string }
+      daycare_overview: {
+        Args: never
+        Returns: {
+          children_count: number
+          name: string
+        }[]
+      }
       email_has_account: { Args: { p_email: string }; Returns: boolean }
       get_invitation_preview: {
         Args: { p_code: string }
@@ -335,10 +505,22 @@ export type Database = {
           status: string
         }[]
       }
+      post_is_own: {
+        Args: { p_daycare_id: string; p_post_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       child_status: "active" | "archived"
       invitation_status: "pending" | "accepted" | "expired" | "cancelled"
+      post_type:
+        | "meal"
+        | "nap"
+        | "activity"
+        | "achievement"
+        | "mood"
+        | "photo"
+        | "announcement"
       relationship_type: "father" | "mother" | "guardian"
       user_role: "admin" | "staff" | "parent"
       user_status: "pending" | "active"
@@ -471,6 +653,15 @@ export const Constants = {
     Enums: {
       child_status: ["active", "archived"],
       invitation_status: ["pending", "accepted", "expired", "cancelled"],
+      post_type: [
+        "meal",
+        "nap",
+        "activity",
+        "achievement",
+        "mood",
+        "photo",
+        "announcement",
+      ],
       relationship_type: ["father", "mother", "guardian"],
       user_role: ["admin", "staff", "parent"],
       user_status: ["pending", "active"],

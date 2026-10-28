@@ -126,6 +126,36 @@ join public.users u on u.id = pc.parent_id
 where pc.child_id = '<uuid>';
 ```
 
+## Publicaciones y fotos
+
+- `public.posts` guarda la publicación (`daycare_id`, `author_id`, `room_id` nullable, `type`, `body`, `published_at`). `title` existe por el diccionario y la app nunca lo escribe.
+- `public.post_children` es el snapshot de destinatarios y el driver del feed del padre. `public.post_photos` guarda metadatos (`storage_path`, `width`, `height`, `position`), no URLs.
+- Los 7 tipos viven en el enum `public.post_type` (`meal`, `nap`, `activity`, `achievement`, `mood`, `photo`, `announcement`).
+- Acceso: `admin` y `staff` del mismo daycare leen y crean. Un padre ve los posts que etiquetan a sus hijos **y** los posts `room_wide` de la sala de sus hijos. No hay policy de `UPDATE` ni `DELETE`.
+- **Toda la sala** se guarda con `room_id` + `room_wide = true` + `post_children` de todos los niños activos de la sala. Un subconjunto guarda `room_wide = false` y llega solo a los seleccionados. La RPC exige el snapshot exacto solo cuando `room_wide = true`; si la sala cambia mientras se escribe, falla con `room_audience_mismatch`.
+- `create_post(type, room_id, room_wide, body, child_ids, photos)` es `security invoker` y escribe las tres tablas en una transacción. El autor y el daycare salen de `auth.uid()` y de `current_staff_daycare_id()`, nunca del cliente.
+- La RPC rechaza `body` fuera de 10–600, salas o niños de otra guardería, más de 4 fotos, paths fuera de `{daycare_id}/{author_id}/` y fotos cuando algún niño tiene `photo_consent = false`.
+- `post_is_own(post_id, daycare_id)` es `security definer` y existe para que las policies de insert de `post_children` y `post_photos` no consulten `posts` directamente: `posts_select_parent` consulta `post_children` y Postgres entra en recursión.
+- Bucket `post-photos`: **privado**, 5 MB por archivo y solo `image/jpeg`, `image/png`, `image/webp`. La ruta es `{daycare_id}/{author_id}/{file_id}.{ext}`. La app firma las URLs con `createSignedUrls` (1 h) y usa `<img>` nativo.
+- El cliente re-encodea a WebP ≤2048 px antes de subir: descarta EXIF/GPS y entrega `width`/`height`. El archivo original nunca sale del navegador.
+- `children.photo_consent` default `true`: la app respeta el flag, pero todavía no existe una pantalla para capturarlo.
+
+```sql
+-- Feed de un daycare (staff)
+select p.id, p.type, p.body, p.published_at, u.full_name as author
+from public.posts p
+join public.users u on u.id = p.author_id
+where p.daycare_id = '<uuid>'
+order by p.published_at desc
+limit 20;
+
+-- Objetos del bucket
+select name, owner_id, metadata
+from storage.objects
+where bucket_id = 'post-photos'
+order by created_at desc;
+```
+
 ## Comprobaciones útiles
 
 ```sql
