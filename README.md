@@ -77,7 +77,14 @@ Email:    kevin07cv2008@gmail.com
 Password: opendaycare2026
 ```
 
-Es una credencial de demostración: cambiala antes de usar el proyecto fuera de desarrollo.
+**Usuario demo de familia** (rol `parent`, madre de Mateo y Sofía en Soles):
+
+```text
+Email:    lucia.fernandez@opendaycare.com
+Password: opendaycare2026
+```
+
+Son credenciales de demostración: cambialas antes de usar el proyecto fuera de desarrollo. El seed de la familia se aplica con `seed_family_demo` y se omite al promover.
 
 Para probar el build de producción:
 

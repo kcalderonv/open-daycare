@@ -81,6 +81,7 @@ export const getComposerAudience = cache(
 export async function getFeedPosts(
   daycareId: string,
   currentUserId: string,
+  familyChildNames?: ReadonlyMap<string, string>,
 ): Promise<FeedPost[]> {
   const supabase = createClient(await cookies());
   const { data, error } = await supabase
@@ -92,10 +93,11 @@ export async function getFeedPosts(
         body,
         published_at,
         author_id,
+        room_id,
         room_wide,
-        author:users!posts_author_fkey(full_name),
-        room:rooms!posts_room_fkey(name),
-        post_children(children(full_name)),
+        author:users!posts_author_fkey(full_name, role),
+        room:rooms!posts_room_fkey(id, name),
+        post_children(child_id, children(full_name)),
         post_photos(storage_path, width, height, position)
       `,
     )
@@ -130,10 +132,22 @@ export async function getFeedPosts(
   return rows.map((row) => {
     const authorName = row.author?.full_name ?? "Equipo";
     const roomName = row.room?.name ?? null;
-    const children = (row.post_children ?? [])
-      .map((link) => link.children?.full_name)
-      .filter((name): name is string => Boolean(name))
-      .map((name) => name.trim().split(/\s+/)[0] ?? name);
+    const roomId = row.room?.id ?? row.room_id ?? null;
+    const links = row.post_children ?? [];
+    const childIds = links
+      .map((link) => link.child_id)
+      .filter((id): id is string => Boolean(id));
+    // Staff resolves the name through the embedded join; a parent cannot read
+    // `children`, so the family map fills the same slot without branching the
+    // query per role.
+    const children = links
+      .map((link) => {
+        const joined = link.children?.full_name;
+        const name = joined ?? familyChildNames?.get(link.child_id) ?? null;
+
+        return name?.trim().split(/\s+/)[0] ?? null;
+      })
+      .filter((name): name is string => Boolean(name));
     const photos: FeedPhoto[] = (row.post_photos ?? [])
       .slice()
       .sort((a, b) => a.position - b.position)
@@ -151,12 +165,18 @@ export async function getFeedPosts(
       authorId: row.author_id,
       authorName,
       authorInitial: authorName.trim().charAt(0).toUpperCase(),
+      authorRole: row.author?.role ?? null,
       publishedAt: row.published_at,
       timeLabel: formatPostTime(row.published_at),
       audienceLabel: audienceLabel(children, row.room_wide ? roomName : null),
       body: row.body,
       photos,
       isOwn: row.author_id === currentUserId,
+      childIds,
+      childNames: children,
+      roomId,
+      roomName,
+      roomWide: row.room_wide,
     };
   });
 }

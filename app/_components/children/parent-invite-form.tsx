@@ -7,7 +7,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { inviteParent } from "@/app/(app)/ninos/invite-actions";
+import { inviteParent } from "@/app/(app)/(staff)/ninos/invite-actions";
 import { CloseIcon, InfoIcon, SendIcon } from "@/app/_components/icons";
 import { useFormDialogClose } from "@/app/_components/ui/form-dialog";
 import { FormField } from "@/app/_components/ui/form-field";

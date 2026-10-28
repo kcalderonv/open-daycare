@@ -50,3 +50,27 @@ export const getCurrentUser = cache(async (): Promise<CurrentUser> => {
     daycareId: profile.daycare_id,
   };
 });
+
+const HOME_BY_ROLE: Record<UserRole, string> = {
+  admin: "/",
+  staff: "/",
+  parent: "/familia",
+};
+
+/**
+ * Panel guard for the data access layer. `getCurrentUser` is cached per
+ * request, so the profile lookup is shared with the layout and the page.
+ * A user who opens the other role's panel is sent to their own one; the proxy
+ * keeps its optimistic session check and never queries the database.
+ */
+export async function requireRole(
+  roles: readonly UserRole[],
+): Promise<CurrentUser> {
+  const user = await getCurrentUser();
+
+  if (!roles.includes(user.role)) {
+    redirect(HOME_BY_ROLE[user.role]);
+  }
+
+  return user;
+}

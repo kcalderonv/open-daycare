@@ -25,6 +25,7 @@ export async function login(
   const nextValue = formData.get("next");
   const email = typeof emailValue === "string" ? emailValue.trim() : "";
   const password = typeof passwordValue === "string" ? passwordValue : "";
+  const hasNext = typeof nextValue === "string" && nextValue.trim() !== "";
   const nextPath = resolveNextPath(
     typeof nextValue === "string" ? nextValue : null,
   );
@@ -47,7 +48,7 @@ export async function login(
 
   const { data: profile, error: profileError } = await supabase
     .from("users")
-    .select("id")
+    .select("id, role")
     .eq("id", data.user.id)
     .eq("status", "active")
     .maybeSingle();
@@ -59,5 +60,7 @@ export async function login(
   }
 
   revalidatePath("/", "layout");
-  redirect(nextPath);
+  // A saved destination wins; the panel guard corrects it if it points to the
+  // other role's panel. Without one, each role lands on its own home.
+  redirect(hasNext ? nextPath : profile.role === "parent" ? "/familia" : "/");
 }

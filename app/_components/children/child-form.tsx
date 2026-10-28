@@ -7,7 +7,7 @@ import {
   type ChangeEvent,
   type FormEvent,
 } from "react";
-import { createChild, updateChild } from "@/app/(app)/ninos/actions";
+import { createChild, updateChild } from "@/app/(app)/(staff)/ninos/actions";
 import { useFormDialogClose } from "@/app/_components/ui/form-dialog";
 import {
   FormField,

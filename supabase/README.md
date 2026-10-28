@@ -126,6 +126,37 @@ join public.users u on u.id = pc.parent_id
 where pc.child_id = '<uuid>';
 ```
 
+## Panel de familia
+
+- `public.current_daycare_id()` es un helper `security definer` con `search_path` fijo que devuelve el daycare del usuario activo **sin filtrar por rol**. `current_staff_daycare_id()` no sirve para un padre: devuelve `null` por diseño.
+- `users_select_staff_of_daycare` deja que un padre lea solo las filas `admin`/`staff` activas de su propio daycare. Es lo que resuelve el autor de una publicación ("Maestra Caro") sin abrir el resto de `users`.
+- `rooms_select_parent` deja que un padre lea solo las salas donde tiene un hijo vinculado. No se puede escribir con un `exists` directo sobre `children`: la subquery de una policy se evalúa con RLS como el usuario actual y un padre no tiene policy sobre `children`. Por eso consulta `family_overview()`.
+- `public.family_overview()` (`security definer`) devuelve el nombre del daycare y, por hijo vinculado, `child_id`, primer nombre, sala y parentesco. Sigue el patrón de `get_invitation_preview`: siempre hay al menos una fila, así que "sin hijos" es un estado (`child_id` null) y no un error. Un usuario de staff no obtiene filas.
+- El padre **no** gana acceso a `children`: las fichas, alergias, notas médicas y fechas de nacimiento siguen fuera de su alcance. Abrir la tabla o un grant por columna habría expuesto de más (`parent_children` y las policies de `children` no permiten RLS por columna).
+- Trade-off aceptado: el padre lee columnas no sensibles de las filas de staff del propio daycare (`avatar_url`, `notify_on_post`, `daily_summary_enabled`). La tabla no guarda email ni datos personales.
+
+```sql
+-- Daycare del usuario activo (no depende del rol)
+select public.current_daycare_id();
+
+-- Lectura de familia de un padre autenticado
+select daycare_name, child_id, first_name, room_id, room_name, relationship
+from public.family_overview()
+order by first_name;
+
+-- Policies nuevas
+select policyname, cmd, qual
+from pg_policies
+where schemaname = 'public'
+  and policyname in ('users_select_staff_of_daycare', 'rooms_select_parent');
+
+-- Un padre no puede leer las fichas de sus hijos
+select has_table_privilege('authenticated', 'public.children', 'select') as grant_existe,
+       (select count(*) from pg_policies
+        where schemaname = 'public' and tablename = 'children'
+          and policyname like '%parent%') as policies_de_padre;
+```
+
 ## Publicaciones y fotos
 
 - `public.posts` guarda la publicación (`daycare_id`, `author_id`, `room_id` nullable, `type`, `body`, `published_at`). `title` existe por el diccionario y la app nunca lo escribe.

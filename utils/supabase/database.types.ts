@@ -485,6 +485,7 @@ export type Database = {
         }
         Returns: string
       }
+      current_daycare_id: { Args: never; Returns: string }
       current_staff_daycare_id: { Args: never; Returns: string }
       daycare_overview: {
         Args: never
@@ -494,6 +495,17 @@ export type Database = {
         }[]
       }
       email_has_account: { Args: { p_email: string }; Returns: boolean }
+      family_overview: {
+        Args: never
+        Returns: {
+          child_id: string
+          daycare_name: string
+          first_name: string
+          relationship: Database["public"]["Enums"]["relationship_type"]
+          room_id: string
+          room_name: string
+        }[]
+      }
       get_invitation_preview: {
         Args: { p_code: string }
         Returns: {

@@ -6,23 +6,27 @@ import { usePathname } from "next/navigation";
 import {
   BellIcon,
   HomeIcon,
+  SunIcon,
   UserIcon,
   UsersIcon,
   type IconProps,
 } from "@/app/_components/icons";
 
-type NavItem = {
+export type NavIcon = "home" | "users" | "bell" | "user" | "sun";
+
+export type NavItem = {
   label: string;
-  icon: ComponentType<IconProps>;
+  icon: NavIcon;
   href: string;
 };
 
-const NAV_ITEMS: NavItem[] = [
-  { label: "Feed", icon: HomeIcon, href: "/" },
-  { label: "Niños", icon: UsersIcon, href: "/ninos" },
-  { label: "Avisos", icon: BellIcon, href: "#" },
-  { label: "Mi cuenta", icon: UserIcon, href: "#" },
-];
+const ICONS: Record<NavIcon, ComponentType<IconProps>> = {
+  home: HomeIcon,
+  users: UsersIcon,
+  bell: BellIcon,
+  user: UserIcon,
+  sun: SunIcon,
+};
 
 function isActive(pathname: string, href: string): boolean {
   if (href === "#") {
@@ -36,12 +40,13 @@ function isActive(pathname: string, href: string): boolean {
   return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export function AppSidebarNav() {
+export function AppSidebarNav({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
 
   return (
     <nav className="flex flex-1 flex-col gap-1">
-      {NAV_ITEMS.map(({ label, icon: Icon, href }) => {
+      {items.map(({ label, icon: iconName, href }) => {
+        const Icon = ICONS[iconName];
         const active = isActive(pathname, href);
 
         return (
