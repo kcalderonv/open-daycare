@@ -4,6 +4,11 @@ schema: spec-driven
 # Add only constraints that should guide OpenSpec artifacts and workflows.
 # Include constraints an agent cannot infer by reading the code.
 # Keep general project documentation and discoverable codebase facts out.
+context: |
+  OpenDayCare es una app web en español para guarderías. Su objetivo es ser el
+  canal privado entre el personal de la guardería y las familias: el staff
+  publica novedades en un feed por sala, mantiene el legajo de los niños y las
+  salas, e invita a los padres, que solo ven la información de sus hijos.
 # Example:
 #   context: |
 #     Designs and tasks must cover Windows, macOS, and Linux

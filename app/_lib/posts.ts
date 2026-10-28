@@ -8,18 +8,26 @@ export type FeedPhoto = {
   height: number | null;
 };
 
+export type FeedAuthorRole = "admin" | "staff" | "parent";
+
 export type FeedPost = {
   id: string;
   type: PostType;
   authorId: string;
   authorName: string;
   authorInitial: string;
+  authorRole: FeedAuthorRole | null;
   publishedAt: string;
   timeLabel: string;
   audienceLabel: string;
   body: string;
   photos: FeedPhoto[];
   isOwn: boolean;
+  childIds: string[];
+  childNames: string[];
+  roomId: string | null;
+  roomName: string | null;
+  roomWide: boolean;
 };
 
 export type ComposerRoom = {
@@ -111,6 +119,49 @@ export function splitFeedByDay(
 
 export function formatPostTime(iso: string): string {
   return timeFormatter.format(new Date(iso));
+}
+
+export type FeedDayGroup = {
+  key: string;
+  label: string;
+  posts: FeedPost[];
+};
+
+/**
+ * Groups the already loaded feed by calendar day in the app time zone. Today
+ * gets the "HOY · " prefix; previous days keep only their date label.
+ */
+export function groupFeedByDay(
+  posts: FeedPost[],
+  now: Date = new Date(),
+): FeedDayGroup[] {
+  const todayKey = dayFormatter.format(now);
+  const groups = new Map<string, FeedPost[]>();
+
+  for (const post of posts) {
+    const key = dayFormatter.format(new Date(post.publishedAt));
+    const group = groups.get(key);
+
+    if (group) {
+      group.push(post);
+    } else {
+      groups.set(key, [post]);
+    }
+  }
+
+  return [...groups.entries()]
+    .sort(([left], [right]) => (left < right ? 1 : -1))
+    .map(([key, dayPosts]) => {
+      const dateLabel = formatFeedDate(
+        new Date(dayPosts[0].publishedAt),
+      ).toUpperCase();
+
+      return {
+        key,
+        label: key === todayKey ? `HOY · ${dateLabel}` : dateLabel,
+        posts: dayPosts,
+      };
+    });
 }
 
 export function formatFeedDate(now: Date = new Date()): string {

@@ -76,5 +76,5 @@ export async function activateAccount(
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  redirect("/familia");
 }
